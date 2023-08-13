@@ -1,4 +1,4 @@
-import { useContext, useLayoutEffect } from 'react';
+import { useContext, useLayoutEffect, useState } from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 
 import IconButton from '../components/UI/IconButton';
@@ -6,10 +6,17 @@ import Button from '../components/UI/Button';
 import { GlobalStyles } from '../constants/styles';
 import { TasksContext } from '../store/tasks-context';
 import TaskForm from '../components/ManageTask/TaskForm';
+import {deleteTask, storeTask, updateTask} from '../util/http';
+import LoadingOverlay from '../components/UI/LoadingOverlay';
+import ErrorOverlay from '../components/UI/ErrorOverlay';
 
 function ManageTasks({route, navigation}){
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState();
+
     const tasksCtx =useContext(TasksContext);
+
     const editedTaskId = route.params?.taskId;
     const isEditing = !!editedTaskId;
 
@@ -23,8 +30,19 @@ function ManageTasks({route, navigation}){
     }, [navigation, isEditing]);
 
     
-    function deleteTaskHandler(){
-        tasksCtx.deleteTask(editedTaskId);
+    async function deleteTaskHandler(){
+        setIsSubmitting(true);
+        try{
+            await deleteTask(editedTaskId);
+            tasksCtx.deleteTask(editedTaskId);
+        }
+
+        catch(error){
+            setError('Could not delete task - please try again later!');
+            setIsSubmitting(false);
+        }
+        
+        
         //goBack() go back to the screen it was called
         navigation.goBack();
         
@@ -39,14 +57,36 @@ function ManageTasks({route, navigation}){
         navigation.goBack();
     }
 
-    function confirmHandler(taskData){
-        if(isEditing){
-            tasksCtx.updateTask(editedTaskId, taskData);
+    async function confirmHandler(taskData){
+        setIsSubmitting(true);
+        try{
+            if(isEditing){
+                //update local first then update firebase
+                tasksCtx.updateTask(editedTaskId, taskData);
+                await updateTask(editedTaskId, taskData);
+            }
+            else{
+                const id = await storeTask(taskData);
+                tasksCtx.addTask({...taskData, id:id});
+            }
+            navigation.goBack();
         }
-        else{
-            tasksCtx.addTask(taskData);
+        catch(error){
+            setError('Could not save data -- Please try again later!')
+            setIsSubmitting(false);
         }
-        navigation.goBack();
+       
+        
+    }
+
+    
+
+    if(error && !isSubmitting){
+        return <ErrorOverlay message={error} />;
+    }
+
+    if (isSubmitting){
+        return <LoadingOverlay/>;
     }
 
     return(
@@ -63,7 +103,7 @@ function ManageTasks({route, navigation}){
                 <View style={styles.deleteContainer}>
                     <IconButton 
                         icon="trash" 
-                        color={GlobalStyles.colors.error500} 
+                        color={GlobalStyles.colors.gray500} 
                         size={36} 
                         onPress={deleteTaskHandler}
                     />
