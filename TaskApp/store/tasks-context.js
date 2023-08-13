@@ -1,40 +1,12 @@
 import { createContext, useReducer } from "react";
 
-const DUMMY_TASKS = [
-    {
-        id:'t1',
-        title:'Buy a pair of shoes',
-        description: 'Buy a pair of shoes...',
-        location:'home',
-        date: new Date('2023-08-29')
-    },
-    {
-        id:'t2',
-        title:'Buy a bag',
-        description: 'Buy a bag...',
-        location:'home',
-        date: new Date('2023-08-03')
-    },
-    {
-        id:'t3',
-        title: 'finish report',
-        description: 'finish the report..',
-        location:'home',
-        date: new Date('2023-08-04')
-    },
-    {
-        id:'t4',
-        title:'finish book',
-        description: 'finish the book...',
-        location:'home',
-        date: new Date('2023-08-05')
-    }
-];
+
 
 
 export const TasksContext = createContext({
     tasks:[],
     addTask:({title, description, location, date})=>{},
+    setTasks:(tasks) =>{},
     deleteTask: (id)=>{},
     updateTask:(id, {title, description,location,date})=>{},
     completeTask: (id)=>{},
@@ -43,8 +15,13 @@ export const TasksContext = createContext({
 function taskReducer(state, action){
     switch(action.type){
         case 'ADD':
-            const id = new Date().toString() + Math.random().toString();
-            return [{...action.payload, id:id},...state];
+            return [action.payload,...state];
+        
+        case 'SET':
+            //return the latest task on top. 
+            const inverted = action.payload.reverse();
+            return inverted;
+
         case 'UPDATE':
             const updateableTaskIndex = state.findIndex(
                 (task)=> task.id === action.payload.id
@@ -66,10 +43,14 @@ function taskReducer(state, action){
 }
 
 function TasksContextProvider({children}){
-    const [tasksSate, dispatch] = useReducer(taskReducer, DUMMY_TASKS);
+    const [tasksSate, dispatch] = useReducer(taskReducer, []);
 
     function addTask(taskData){
         dispatch({type:'ADD', payload:taskData});
+    }
+
+    function setTasks(tasks){
+        dispatch({type:'SET', payload:tasks});
     }
 
     function deleteTask(id){
@@ -86,6 +67,7 @@ function TasksContextProvider({children}){
     const value ={
         tasks: tasksSate,
         addTask: addTask,
+        setTasks:setTasks,
         deleteTask:deleteTask,
         updateTask: updateTask,
         completeTask:completeTask,
