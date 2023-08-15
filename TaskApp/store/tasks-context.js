@@ -5,10 +5,10 @@ import { createContext, useReducer } from "react";
 
 export const TasksContext = createContext({
     tasks:[],
-    addTask:({title, description, location, date})=>{},
+    addTask:({title, description, location, date, reminder})=>{},
     setTasks:(tasks) =>{},
     deleteTask: (id)=>{},
-    updateTask:(id, {title, description,location,date})=>{},
+    updateTask:(id, {title, description,location,date, reminder})=>{},
     completeTask: (id)=>{},
 });
 

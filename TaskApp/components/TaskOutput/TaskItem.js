@@ -8,7 +8,7 @@ import { TasksContext } from "../../store/tasks-context";
 
 
 //create the task item card
-function TaskItem({id,title, description, location, date}){
+function TaskItem({id,title, description, location, date, reminder}){
 
     //as the function is not part of a screen, to use navigate, need to use a prop
     const navigation = useNavigation();

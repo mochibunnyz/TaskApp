@@ -1,9 +1,12 @@
-import { View, StyleSheet, Text, Alert, TextInput, Pressable, Platform, TouchableOpacity } from "react-native";
+import { View, StyleSheet, Text, Alert, TextInput, Pressable, Platform, TouchableOpacity, Button } from "react-native";
 import Input from "./Input";
 import { useState } from "react";
+import * as Notifications from 'expo-notifications';
+import { useEffect } from 'react';
 
-import Button from "../UI/Button";
-import { getFormattedDate } from "../../util/date";
+
+//import Button from "../UI/Button";
+import { getFormattedDate, toDateStringFunction, toStringFunction } from "../../util/date";
 import { GlobalStyles } from "../../constants/styles";
 import DateTimePicker from '@react-native-community/datetimepicker';
 
@@ -19,23 +22,28 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
     const [title,setTitle] = useState(defaultValues ?  defaultValues.title: '');
     const [titleIsValid, setTitleIsValid] = useState(true);
 
-    const [date, setDate] = useState(defaultValues ? getFormattedDate(defaultValues.date): "");
+
+    const [date, setDate] = useState(defaultValues ? toDateStringFunction(defaultValues.date): "");
     const [dateIsValid, setDateIsValid] = useState(true);
 
     const [description, setDescription] = useState(defaultValues ? defaultValues.description: '');
     const [descriptionIsValid, setDescriptionIsValid] = useState(true);
 
+    const [pickerReminder, setPickerReminder] = useState(new Date());
+    const [showReminderPicker, setShowReminderPicker] = useState(false);
+    const [reminder, setReminder] = useState(defaultValues ? toStringFunction(defaultValues.reminder): "");
+    //const [reminder, setReminder] = useState("");
+
     const inputStyles=[styles.input];
     
-
-   
     
-
+    //to submit data
     function submitHandler(){
         const taskData ={
             location: location,
             title:title,
             date: new Date(date),
+            reminder: new Date(reminder),
             description:description
         };
 
@@ -71,6 +79,10 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
         setShowPicker(!showPicker);
     };
 
+    const toggleReminderpicker = () =>{
+        setShowReminderPicker(!showReminderPicker);
+    };
+
     //for changing picker date
     const onChange =({type}, selectedDate) =>{
         if(type == "set"){
@@ -82,6 +94,17 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
         }
     };
 
+    const onChangeReminder =({type}, selectedDate) =>{
+        if(type == "set"){
+            const currentReminderDate = selectedDate;
+            setPickerReminder(currentReminderDate);
+        }
+        else{
+            toggleReminderpicker();
+        }
+    };
+
+
 
     //to confirm the date from the datepicker into date textInput
     const confirmDate =() =>{
@@ -89,12 +112,103 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
         toggleDatepicker();
     }
 
+    const confirmReminder =() =>{
+        
+        setReminder(pickerReminder.toString());
+        toggleReminderpicker();
+    }
+
+   
+    Notifications.setNotificationHandler({
+        handleNotification: async () => {
+        return {
+            shouldPlaySound: false,
+            shouldSetBadge: false,
+            shouldShowAlert: true,
+        };
+        },
+    });
+      
+    //// (NEED FOR IOS CUZ IOS NEED PERMISSION////
+    const allowsNotificationsAsync = async () => {
+        const settings = await Notifications.getPermissionsAsync();
+        return (
+        settings.granted ||
+        settings.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL
+        );
+    };
+   
+    const requestPermissionsAsync = async () => {
+        return await Notifications.requestPermissionsAsync({
+        ios: {
+            allowAlert: true,
+            allowBadge: true,
+            allowSound: true,
+            allowAnnouncements: true,
+        },
+        });
+    };
+    //// END ////
+    
+
+    useEffect(()=>{
+        const subscription1 = Notifications.addNotificationReceivedListener((notification)=> {
+          console.log('NOTIFICATION RECEIVED');
+          console.log(notification);
+          // extract the username data
+          const userName = notification.request.content.data.userName;
+          
+        });
+    
+        //user response by tapping on the notification
+        const subscription2 = Notifications.addNotificationResponseReceivedListener((response)=> {
+          console.log('NOTIFICATION RESPONSE RECEIVED');
+          console.log(response);
+          
+          
+          
+        });
+    
+        return () =>{
+          subscription1.remove();
+          subscription2.remove();
+        };
+        
+      },[]
+    );
+    //// Set Schedule Notification and its content///
+    const scheduleNotificationHandler = async () =>{
+        //// START: CALL FUNCTIONS HERE ////
+        const hasPushNotificationPermissionGranted =
+        await allowsNotificationsAsync();
+
+
+        if (!hasPushNotificationPermissionGranted) {
+            await requestPermissionsAsync();
+        }
+        //// END: CALL FUNCTIONS HERE ////
+
+        Notifications.scheduleNotificationAsync({
+            content: {
+              title: "My first local notification",
+              body: "This is the body of the notification.",
+              data: { userName: "Max" },
+            },
+            trigger: {
+              seconds: 2,
+            },
+        });
+    }
+    
+
+    
+
     //view for the form
     const formIsInvalid = !locationIsValid  ||!titleIsValid ||!dateIsValid|| !descriptionIsValid; 
     return (
         <View style={styles.form}>
             
-            
+            {/* for  title  */}
             <View style={styles.inputsRow}>
                 <View style={[styles.inputContainer,styles.rowInput]}>
                     <Text style={[styles.label]}>Title</Text>
@@ -119,7 +233,7 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
             </View>
             
    
-            {/* for date  */}
+            {/* for due date  */}
             <View style={styles.inputsRow}>
                 <View style={[styles.inputContainer,styles.rowInput]}>
                     <Text style={[styles.label]}>Due Date</Text>
@@ -158,7 +272,7 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
                         >
                             <TextInput
                                 style={styles.input}
-                                placeholder="2023-08-07"
+                                placeholder="Mon Aug 14 2023"
                                 value= {date}
                                 onChangeText={setDate}
                                 editable={false}
@@ -175,7 +289,80 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
                 
             </View>
 
+            {/* input text for reminder */}
+            <View style={styles.inputsRow}>
+                <View style={[styles.inputContainer,styles.rowInput]}>
+                    <Text style={[styles.label]}>Reminder</Text>
+                    {/* DateTimePicker */}
+                    {showReminderPicker && (
+                        <DateTimePicker
+                        mode="datetime"
+                        display="spinner"
+                        value={pickerReminder}
+                        onChange={onChangeReminder}
+                        style = {styles.datePicker}
+                        textColor={GlobalStyles.colors.primary700}
+                        />
+
+                    )}
+                    {/* buttons for DatePicker */}
+                    {showReminderPicker && Platform.OS === 'ios' &&(
+                        <View 
+                        style={[styles.pickerButtonContainer]}
+                        >
+                            <TouchableOpacity onPress= {toggleReminderpicker} style={[styles.pickerButtons, styles.dateButton, styles.whiteButtons]}>
+                                <Text style={styles.purpleText}>Cancel</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity onPress = {confirmReminder} style={[styles.pickerButtons, styles.dateButton, styles.blueButtons]}>
+                                <Text style= {{color:'white'}}>Confirm</Text>
+                            </TouchableOpacity>
+
+
+                        </View>
+
+                    )}
+                    {!showReminderPicker && (
+                        <Pressable
+                            onPress={toggleReminderpicker}
+                        >
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Mon Aug 14 2023"
+                                value= {reminder}
+                                onChangeText={setReminder}
+                                editable={false}
+                                onPressIn={toggleReminderpicker}
+                            />
+                        
+
+                        </Pressable>
+                    )}
+                    
+                </View>
+
+                
+                
+            </View>
+
+            {/* input text for descriptions */}
+            <View style={[styles.inputContainer,styles.rowInput]}>
+                <Text style={[styles.label]}>Description</Text>
+                <TextInput 
+                    style={[styles.input, styles.inputMultiline]}
+                    value={description}
+                    onChangeText={setDescription}
+                    multiline= {true}
+                />
+            </View>
+            {/* <Button
+            title='Schedule Notification'
+            onPress={scheduleNotificationHandler}
+            /> */}
+
             
+
+            {/* input text for descriptions */}
             <View style={[styles.inputContainer,styles.rowInput]}>
                 <Text style={[styles.label]}>Description</Text>
                 <TextInput 
