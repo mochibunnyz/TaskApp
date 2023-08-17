@@ -10,6 +10,19 @@ import {deleteTask, storeTask, updateTask} from '../util/http';
 import LoadingOverlay from '../components/UI/LoadingOverlay';
 import ErrorOverlay from '../components/UI/ErrorOverlay';
 
+import { useLocalNotification } from "../util/useLocalNotification";
+import * as Notifications from "expo-notifications";
+import { schedulePushNotification } from "../util/handle-local-notification";
+//import { Button } from "react-native";
+
+Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false
+    })
+});
+
 function ManageTasks({route, navigation}){
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,6 +34,8 @@ function ManageTasks({route, navigation}){
     const isEditing = !!editedTaskId;
 
     const selectedTask = tasksCtx.tasks.find((task) => task.id === editedTaskId);
+
+    useLocalNotification();
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -66,8 +81,13 @@ function ManageTasks({route, navigation}){
                 await updateTask(editedTaskId, taskData);
             }
             else{
+                const reminderId = await schedulePushNotification(taskData.title, taskData.date, taskData.location, taskData.reminder);
+                
                 const id = await storeTask(taskData);
                 tasksCtx.addTask({...taskData, id:id});
+                
+                
+                
             }
             navigation.goBack();
         }
