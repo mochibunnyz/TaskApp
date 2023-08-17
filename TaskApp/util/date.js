@@ -12,9 +12,7 @@ export function toDateStringFunction(date){
 }
 
 export function toStringFunction(date){
-    x1 = new Date(date);
-    x2 = x1.toString
-
+   
     return date.toString()
     //return x2
 }

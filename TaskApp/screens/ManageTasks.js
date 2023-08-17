@@ -1,5 +1,5 @@
 import { useContext, useLayoutEffect, useState } from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, Text, View, ScrollView} from 'react-native';
 
 import IconButton from '../components/UI/IconButton';
 import Button from '../components/UI/Button';
@@ -81,6 +81,7 @@ function ManageTasks({route, navigation}){
                 await updateTask(editedTaskId, taskData);
             }
             else{
+                //create reminder
                 const reminderId = await schedulePushNotification(taskData.title, taskData.date, taskData.location, taskData.reminder);
                 
                 const id = await storeTask(taskData);
@@ -111,6 +112,9 @@ function ManageTasks({route, navigation}){
 
     return(
         <View style={styles.container}>
+            <ScrollView>
+
+            
             <TaskForm 
                 submitButtonLabel={isEditing? 'Update' : 'Add'} 
                 onSubmit={confirmHandler}
@@ -129,6 +133,7 @@ function ManageTasks({route, navigation}){
                     />
                 </View>
             ) }
+            </ScrollView>
         </View>
     );
 }
@@ -147,7 +152,9 @@ const styles = StyleSheet.create({
         paddingTop:8,
         borderTopWidth:2,
         borderTopColor:GlobalStyles.colors.primary200,
-        alignItems:'center'
+        alignItems:'center',
+        marginBottom:8,
+        
 
 
     }

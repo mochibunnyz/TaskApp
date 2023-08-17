@@ -1,4 +1,4 @@
-import { View, StyleSheet, Text, Alert, TextInput, Pressable, Platform, TouchableOpacity, Button } from "react-native";
+import { View, StyleSheet, Text, Alert, TextInput, Pressable, Platform, TouchableOpacity, ScrollView } from "react-native";
 import { useState } from "react";
 
 import { useEffect, useRef } from 'react';
@@ -32,8 +32,10 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
     const [pickerReminder, setPickerReminder] = useState(new Date());
     const [showReminderPicker, setShowReminderPicker] = useState(false);
     const [reminder, setReminder] = useState(defaultValues ? toStringFunction(defaultValues.reminder): "");
-    //const [reminder, setReminder] = useState("");
-    
+    const [reminderIsValid, setReminderIsValid] = useState(true);
+
+    const [link, setLink] = useState(defaultValues ? defaultValues.link: '');
+   
     
 
     const inputStyles=[styles.input];
@@ -46,38 +48,37 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
             title:title,
             date: new Date(date),
             reminder: new Date(reminder),
+            link: link,
             description:description
         };
 
         //VALIDATION
         
-        const locationIsValid =taskData.location.trim().length >0;
-        const titleIsValid = taskData.title.trim().length >0;
-        const dateIsValid = taskData.date.toString() !== 'Invalid Date';
+        const checklocationIsValid =taskData.location.trim().length >0;
+        const checktitleIsValid = taskData.title.trim().length >0;
+        const checkdateIsValid = taskData.date.toString() !== 'Invalid Date';
+        const checkreminderIsValid = taskData.date.toString() !== 'Invalid Date';
+
+        setLocationIsValid(checklocationIsValid);
+        setTitleIsValid(checktitleIsValid);
+        setDateIsValid(checkdateIsValid);
+        setReminderIsValid(checkreminderIsValid);
+        console.log(checktitleIsValid);
+        console.log(titleIsValid);
+        
+    
         //trim() remove all the white spaces
-        const descriptionIsValid = taskData.description.trim().length >0;
+        //const descriptionIsValid = taskData.description.trim().length >0;
 
-        // if(!locationIsValid  || !titleIsValid|| !dateIsValid || !descriptionIsValid){
+       /*  if(!locationIsValid  || !titleIsValid|| !dateIsValid || !descriptionIsValid){
 
-        //     //show feedback
-        //     setInputs((curInputs)=>{
-        //         return{
-        //             location:{value:curInputs.location.value, isValid:locationIsValid},
-        //             title:{value:curInputs.title.value, isValid:titleIsValid},
-        //             date:{value:curInputs.date.value, isValid:dateIsValid},
-        //             description:{value:curInputs.description.value, isValid:descriptionIsValid},
-        //         };
-        //     });
-        //     //return to stop the submition
-        //     return;
-        // }
+       
+            return;
+        } */
 
         //submit data 
         onSubmit(taskData);
 
-        //sechdeule reminder
-        //const reminderDate = new Date(reminder);
-        //const createReminder = await schedulePushNotification(reminderDate);
         
 
 
@@ -130,45 +131,14 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
     }
 
    
-    /* Notifications.setNotificationHandler({
-        handleNotification: async () => {
-        return {
-            shouldPlaySound: false,
-            shouldSetBadge: false,
-            shouldShowAlert: true,
-        };
-        },
-    });
-      
-    useEffect(() => {
-        registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
-    
-        notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-          setNotification(notification);
-        });
-    
-        responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-          console.log(response);
-        });
-    
-        return () => {
-          Notifications.removeNotificationSubscription(notificationListener.current);
-          Notifications.removeNotificationSubscription(responseListener.current);
-        };
-      }, []
-    );
- */
-    
-    
 
     
 
     //view for the form
-    const formIsInvalid = !locationIsValid  ||!titleIsValid ||!dateIsValid|| !descriptionIsValid; 
+    const formIsInvalid = !locationIsValid  ||!titleIsValid ||!dateIsValid|| !reminderIsValid; 
     return (
         <View style={styles.form}>
             
-            {/* for  title  */}
             <View style={styles.inputsRow}>
                 <View style={[styles.inputContainer,styles.rowInput]}>
                     <Text style={[styles.label]}>Title</Text>
@@ -180,6 +150,7 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
                 </View>
 
             </View>
+    
             <View style={styles.inputsRow}>
                 <View style={[styles.inputContainer,styles.rowInput]}>
                     <Text style={[styles.label]}>Location</Text>
@@ -192,7 +163,7 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
 
             </View>
             
-   
+
             {/* for due date  */}
             <View style={styles.inputsRow}>
                 <View style={[styles.inputContainer,styles.rowInput]}>
@@ -232,7 +203,7 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
                         >
                             <TextInput
                                 style={styles.input}
-                                placeholder="Mon Aug 14 2023"
+                                placeholder={pickerDate.toDateString()}
                                 value= {date}
                                 onChangeText={setDate}
                                 editable={false}
@@ -288,7 +259,7 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
                         >
                             <TextInput
                                 style={styles.input}
-                                placeholder="Mon Aug 14 2023"
+                                placeholder={pickerReminder.toString()}
                                 value= {reminder}
                                 onChangeText={setReminder}
                                 editable={false}
@@ -305,24 +276,21 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
                 
             </View>
 
-            {/* input text for descriptions */}
-            <View style={[styles.inputContainer,styles.rowInput]}>
-                <Text style={[styles.label]}>Description</Text>
-                <TextInput 
-                    style={[styles.input, styles.inputMultiline]}
-                    value={description}
-                    onChangeText={setDescription}
-                    multiline= {true}
-                />
-            </View>
-            {/* <Button
-                title="Press to schedule a notification"
-                onPress={async () => {
-                await schedulePushNotification();
-                }}
-            /> */}
-
             
+
+            {/* for  link  */}
+            <View style={styles.inputsRow}>
+                <View style={[styles.inputContainer,styles.rowInput]}>
+                    <Text style={[styles.label]}>Link</Text>
+                    <TextInput 
+                        style={[inputStyles]}
+                        value={link}
+                        onChangeText={setLink}
+                        placeholder="Link"
+                    />
+                </View>
+
+            </View>
 
             {/* input text for descriptions */}
             <View style={[styles.inputContainer,styles.rowInput]}>
@@ -332,9 +300,31 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
                     value={description}
                     onChangeText={setDescription}
                     multiline= {true}
+                    placeholder="Notes"
                 />
             </View>
-            
+
+            {/* for  others */}
+            {/* <View style={styles.inputsRow}>
+                <View style={[styles.inputContainer,styles.rowInput]}>
+                    <Text style={[styles.label]}>Others</Text>
+                    <TextInput 
+                        style={[inputStyles]}
+                        value={link}
+                        onChangeText={setLink}
+                        placeholder="Link"
+                    />
+                    <TextInput 
+                    style={[styles.input, styles.inputMultiline, {marginTop:0, borderTopWidth:0.2, borderTopColor:"blue"}]}
+                    value={description}
+                    onChangeText={setDescription}
+                    multiline= {true}
+                    placeholder="Notes"
+                />
+                </View>
+
+            </View>
+                */}
             
 
             {/* validation message */}
@@ -349,6 +339,7 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
                     <Text style= {{color:'white'}}>{submitButtonLabel}</Text>
                 </TouchableOpacity >
             </View>
+            
 
         </View>
     );
@@ -371,7 +362,7 @@ const styles = StyleSheet.create({
         flexDirection:'row',
         justifyContent:'center',
         alignItems:'center',
-        marginTop:200,
+        marginTop:50,
     },
     button:{
         minWidth:120,
@@ -412,6 +403,14 @@ const styles = StyleSheet.create({
         borderRadius:6,
         fontSize:15
     },
+    invalidInput:{
+        backgroundColor:GlobalStyles.colors.error50,
+        
+    },
+    validInput:{
+        backgroundColor:GlobalStyles.colors.primary100,
+    },
+
     inputContainer:{
         marginHorizontal:4,
         marginVertical:8,
@@ -454,53 +453,3 @@ const styles = StyleSheet.create({
     },
     
 })
-//// Set Schedule Notification and its content///
-/* async function schedulePushNotification() {
-    //Add 10 seconds to the current date to test it.
-    //reminderDate.setSeconds(reminderDate.getSeconds() + 10);
-
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: "You've got a notification! 📬",
-        body: 'Here is the notification text',
-        data: { data: 'Any data comes here' },
-      },
-      trigger: { seconds: 2 },
-    });
-  
-    
-  }
-  
-  async function registerForPushNotificationsAsync() {
-    let token;
-  
-    if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync('default', {
-        name: 'default',
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#FF231F7C',
-      });
-    }
-  
-    if (Device.isDevice) {
-      const { status: existingStatus } = await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
-      if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
-      if (finalStatus !== 'granted') {
-        alert('Failed to get push token for push notification!');
-        return;
-      }
-      token = (await Notifications.getExpoPushTokenAsync({
-          projectId: '13c7c352-57fd-4072-a7d3-ae7664b85eaa',
-      })).data;
-      console.log(token);
-    } else {
-      alert('Must use physical device for Push Notifications');
-    }
-  
-    return token;
-} */
