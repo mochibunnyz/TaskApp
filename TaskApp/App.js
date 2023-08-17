@@ -31,7 +31,7 @@ function TasksOverview(){
       screenOptions={({navigation})=>({
         headerStyle: {backgroundColor: GlobalStyles.colors.primary500},
         headerTintColor: 'black',
-        tabBarStyle:{backgroundColor:GlobalStyles.colors.primary500},
+        tabBarStyle:{backgroundColor:GlobalStyles.colors.primary500, height:90, paddingTop:20},
         tabBarActiveTintColor: GlobalStyles.colors.primary400,
         // this adds a plus button in the header
         headerRight: ({tintColor}) => (
