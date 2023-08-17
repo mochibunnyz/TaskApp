@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "TaskApp",
-    "slug": "TaskApp",
+    "slug": "busybuddy",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -32,9 +32,14 @@
         {
           "icon": "./local/assets/icon.png",
           "color": "#ffffff"
-          
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "13c7c352-57fd-4072-a7d3-ae7664b85eaa"
+      }
+    },
+    "owner": "mochibunnyz"
   }
 }

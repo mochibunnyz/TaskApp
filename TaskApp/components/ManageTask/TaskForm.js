@@ -1,14 +1,14 @@
 import { View, StyleSheet, Text, Alert, TextInput, Pressable, Platform, TouchableOpacity, Button } from "react-native";
-import Input from "./Input";
 import { useState } from "react";
-import * as Notifications from 'expo-notifications';
-import { useEffect } from 'react';
+
+import { useEffect, useRef } from 'react';
 
 
 //import Button from "../UI/Button";
 import { getFormattedDate, toDateStringFunction, toStringFunction } from "../../util/date";
 import { GlobalStyles } from "../../constants/styles";
 import DateTimePicker from '@react-native-community/datetimepicker';
+
 
 
 function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
@@ -33,6 +33,8 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
     const [showReminderPicker, setShowReminderPicker] = useState(false);
     const [reminder, setReminder] = useState(defaultValues ? toStringFunction(defaultValues.reminder): "");
     //const [reminder, setReminder] = useState("");
+    
+    
 
     const inputStyles=[styles.input];
     
@@ -70,7 +72,15 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
         //     return;
         // }
 
+        //submit data 
         onSubmit(taskData);
+
+        //sechdeule reminder
+        //const reminderDate = new Date(reminder);
+        //const createReminder = await schedulePushNotification(reminderDate);
+        
+
+
 
     }
 
@@ -78,7 +88,7 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
     const toggleDatepicker = () =>{
         setShowPicker(!showPicker);
     };
-
+    //to togger the visibility of the reminder
     const toggleReminderpicker = () =>{
         setShowReminderPicker(!showReminderPicker);
     };
@@ -94,6 +104,7 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
         }
     };
 
+    //for changing reminder date
     const onChangeReminder =({type}, selectedDate) =>{
         if(type == "set"){
             const currentReminderDate = selectedDate;
@@ -111,7 +122,7 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
         setDate(pickerDate.toDateString());
         toggleDatepicker();
     }
-
+    //to confirm the date from the reminder picker into reminder textInput
     const confirmReminder =() =>{
         
         setReminder(pickerReminder.toString());
@@ -119,7 +130,7 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
     }
 
    
-    Notifications.setNotificationHandler({
+    /* Notifications.setNotificationHandler({
         handleNotification: async () => {
         return {
             shouldPlaySound: false,
@@ -129,76 +140,25 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
         },
     });
       
-    //// (NEED FOR IOS CUZ IOS NEED PERMISSION////
-    const allowsNotificationsAsync = async () => {
-        const settings = await Notifications.getPermissionsAsync();
-        return (
-        settings.granted ||
-        settings.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL
-        );
-    };
-   
-    const requestPermissionsAsync = async () => {
-        return await Notifications.requestPermissionsAsync({
-        ios: {
-            allowAlert: true,
-            allowBadge: true,
-            allowSound: true,
-            allowAnnouncements: true,
-        },
-        });
-    };
-    //// END ////
+    useEffect(() => {
+        registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
     
-
-    useEffect(()=>{
-        const subscription1 = Notifications.addNotificationReceivedListener((notification)=> {
-          console.log('NOTIFICATION RECEIVED');
-          console.log(notification);
-          // extract the username data
-          const userName = notification.request.content.data.userName;
-          
+        notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+          setNotification(notification);
         });
     
-        //user response by tapping on the notification
-        const subscription2 = Notifications.addNotificationResponseReceivedListener((response)=> {
-          console.log('NOTIFICATION RESPONSE RECEIVED');
+        responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
           console.log(response);
-          
-          
-          
         });
     
-        return () =>{
-          subscription1.remove();
-          subscription2.remove();
+        return () => {
+          Notifications.removeNotificationSubscription(notificationListener.current);
+          Notifications.removeNotificationSubscription(responseListener.current);
         };
-        
-      },[]
+      }, []
     );
-    //// Set Schedule Notification and its content///
-    const scheduleNotificationHandler = async () =>{
-        //// START: CALL FUNCTIONS HERE ////
-        const hasPushNotificationPermissionGranted =
-        await allowsNotificationsAsync();
-
-
-        if (!hasPushNotificationPermissionGranted) {
-            await requestPermissionsAsync();
-        }
-        //// END: CALL FUNCTIONS HERE ////
-
-        Notifications.scheduleNotificationAsync({
-            content: {
-              title: "My first local notification",
-              body: "This is the body of the notification.",
-              data: { userName: "Max" },
-            },
-            trigger: {
-              seconds: 2,
-            },
-        });
-    }
+ */
+    
     
 
     
@@ -356,8 +316,10 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
                 />
             </View>
             {/* <Button
-            title='Schedule Notification'
-            onPress={scheduleNotificationHandler}
+                title="Press to schedule a notification"
+                onPress={async () => {
+                await schedulePushNotification();
+                }}
             /> */}
 
             
@@ -492,3 +454,53 @@ const styles = StyleSheet.create({
     },
     
 })
+//// Set Schedule Notification and its content///
+/* async function schedulePushNotification() {
+    //Add 10 seconds to the current date to test it.
+    //reminderDate.setSeconds(reminderDate.getSeconds() + 10);
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "You've got a notification! 📬",
+        body: 'Here is the notification text',
+        data: { data: 'Any data comes here' },
+      },
+      trigger: { seconds: 2 },
+    });
+  
+    
+  }
+  
+  async function registerForPushNotificationsAsync() {
+    let token;
+  
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+      });
+    }
+  
+    if (Device.isDevice) {
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== 'granted') {
+        alert('Failed to get push token for push notification!');
+        return;
+      }
+      token = (await Notifications.getExpoPushTokenAsync({
+          projectId: '13c7c352-57fd-4072-a7d3-ae7664b85eaa',
+      })).data;
+      console.log(token);
+    } else {
+      alert('Must use physical device for Push Notifications');
+    }
+  
+    return token;
+} */

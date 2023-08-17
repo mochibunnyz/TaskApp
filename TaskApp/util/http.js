@@ -19,7 +19,9 @@ export async function fetchTask(){
             date: new Date (response.data[key].date),
             description: response.data[key].description,
             location: response.data[key].location,
+            reminder:new Date(response.data[key].reminder),
             title:response.data[key].title
+            
         };
         tasks.push(taskObj);
     }
