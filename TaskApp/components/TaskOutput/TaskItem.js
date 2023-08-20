@@ -21,7 +21,10 @@ function TaskItem({id,title, description, location, date, reminder, link}){
     }
 
     function taskPressHandler(){
-        navigation.navigate('ManageTask',{
+        /* navigation.navigate('ManageTask',{
+            taskId:id
+        }); */
+        navigation.navigate('TaskDetails',{
             taskId:id
         });
     
