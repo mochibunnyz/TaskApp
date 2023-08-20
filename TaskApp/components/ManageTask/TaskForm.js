@@ -63,8 +63,6 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
         setTitleIsValid(checktitleIsValid);
         setDateIsValid(checkdateIsValid);
         setReminderIsValid(checkreminderIsValid);
-        console.log(checktitleIsValid);
-        console.log(titleIsValid);
         
     
         //trim() remove all the white spaces

@@ -24,7 +24,7 @@ function RecentTasks(){
        
         
 
-        return (task.date >= today) && (task.date <= date7DaysLater);
+        return (task.date>= today ) && (task.date <= date7DaysLater) ;
     });
     return(
         <TasksOutput tasks = {recentTasks} tasksPeriod="Week"/>

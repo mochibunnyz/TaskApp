@@ -16,6 +16,7 @@ import IconButton from './components/UI/IconButton';
 import TasksContextProvider from './store/tasks-context';
 
 import * as Notifications from "expo-notifications";
+
 //import LoginScreen from './screens/LoginScreen';
 
 
@@ -131,6 +132,7 @@ export default function App() {
               presentation:'modal',
             }}/>
             <Stack.Screen name = "TaskDetails" component={TaskDetails} />
+            {/* <Stack.Screen name = "WeeklyTasks" component={WeeklyTask} /> */}
           </Stack.Navigator>
 
         </NavigationContainer>

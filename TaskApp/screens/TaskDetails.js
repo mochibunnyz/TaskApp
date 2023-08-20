@@ -1,12 +1,13 @@
 import { useContext, useLayoutEffect, useState } from 'react';
-import {StyleSheet, Text, View, ScrollView, Button, Linking} from 'react-native';
+import {StyleSheet, Text, View, ScrollView, Button, Linking, TouchableOpacity} from 'react-native';
 import LoadingOverlay from '../components/UI/LoadingOverlay';
 
 import { GlobalStyles } from '../constants/styles';
 import { TasksContext } from '../store/tasks-context';
 import { getFormattedDate, toDateStringFunction, toTimeSlice} from '../util/date';
 import { Ionicons } from '@expo/vector-icons';
-
+import IconButton from '../components/UI/IconButton';
+import {deleteTask, storeTask, updateTask} from '../util/http';
 
 
 function TaskDetails({route, navigation}){
@@ -17,6 +18,24 @@ function TaskDetails({route, navigation}){
     //const isEditing = !!editedTaskId;
 
     const selectedTask = tasksCtx.tasks.find((task) => task.id === editedTaskId);
+
+    async function deleteTaskHandler(){
+        setIsSubmitting(true);
+        try{
+            await deleteTask(editedTaskId);
+            tasksCtx.deleteTask(editedTaskId);
+        }
+
+        catch(error){
+            setError('Could not delete task - please try again later!');
+            setIsSubmitting(false);
+        }
+        
+        
+        //goBack() go back to the screen it was called
+        navigation.goBack();
+        
+    }
     
     function taskPressHandler(){
         navigation.navigate('ManageTask',{
@@ -46,35 +65,53 @@ function TaskDetails({route, navigation}){
 
             </View>
             {/*Location */}
-            <View style= {styles. dividerContainer}>
-                <Text style= {styles.label}>Location</Text>
-                
-                <View style={styles.locationContainer}>
-                    <Ionicons name="location-outline" size={12} color="black"  />
-                    <Text style= {styles.location}>{selectedTask.location}</Text>
+            {selectedTask.location &&(
+                <View style= {styles. dividerContainer}>
+                    <Text style= {styles.label}>Location</Text>
+                    
+                    <View style={styles.locationContainer}>
+                        <Ionicons name="location-outline" size={12} color="black"  />
+                        <Text style= {styles.location}>{selectedTask.location}</Text>
 
+                    </View>
+                    
                 </View>
-                
-            </View>
+            )}
+            
             {/*details */}
-            <View style={styles.dividerContainer}>
-                <Text style={styles.label}>Details </Text>
-                <Text>{selectedTask.description}</Text>
-            </View>
+            {selectedTask.description &&(
+                <View style={styles.dividerContainer}>
+                    <Text style={styles.label}>Details </Text>
+                    <Text>{selectedTask.description}</Text>
+                </View>
+            )}
+            
 
             {/*Link */}
-            <View style={styles.dividerContainer}>
-                <Text style={styles.label}>Link </Text>
-                <Text style={[styles.text, styles.blueText]} onPress={() => Linking.openURL(selectedTask.link)}>{selectedTask.link}</Text>
-                
-            </View>
+            {selectedTask.link &&(
+                <View style={styles.dividerContainer}>
+                    <Text style={styles.label}>Link </Text>
+                    <Text style={[styles.text, styles.blueText]} onPress={() => Linking.openURL(selectedTask.link)}>{selectedTask.link}</Text>
+                </View>
+            )}
+            
 
             {/*Reminders */}
             <View style={styles.dividerContainer}>
                 <Text style={styles.label}>Reminders </Text>
                 <Text style={styles.text}>{getFormattedDate(selectedTask.reminder)} - {toTimeSlice(selectedTask.reminder)}</Text>
             </View>
-            
+
+            {/*Button */}
+            <View style={styles.buttonsContainer}>
+                <TouchableOpacity  style={[styles.detailsButtons, styles.whiteButtons]}>
+                    <Text style={styles.purpleText}>Delete</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={[styles.detailsButtons, styles.blueButtons]}>
+                    <Text style= {{color:'white'}}>Confirm</Text>
+                </TouchableOpacity>
+            </View>
             
             
             
@@ -119,6 +156,7 @@ const styles = StyleSheet.create({
         left: 0,
         marginTop:5,
         marginBottom:10,
+        color:GlobalStyles.colors.primary700,
     },
     locationContainer:{
         
@@ -144,6 +182,31 @@ const styles = StyleSheet.create({
     blueText:{
         color:'blue'
     },
+    buttonsContainer:{
+        flexDirection:'row', 
+        justifyContent:'space-around',
+       
+    },
+    detailsButtons:{
+        minWidth:80,
+        minHeight:30,
+        marginTop:30,
+        marginHorizontal:8,
+        backgroundColor:'white',
+        borderRadius:30,
+        justifyContent:'center',
+        paddingHorizontal:20,
+        paddingVertical:15,
+    },
+    blueButtons:{
+        backgroundColor:GlobalStyles.colors.primary700,
+        
+    },
+    whiteButtons:{
+        borderColor:GlobalStyles.colors.primary700,
+        borderWidth:1,
+    },
+    
     
     
 })
