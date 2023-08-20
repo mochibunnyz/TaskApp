@@ -8,12 +8,13 @@ import {Ionicons, FontAwesome} from '@expo/vector-icons';
 
 import ManageTasks from './screens/ManageTasks';
 import RecentTasks from './screens/RecentTasks';
+import TaskDetails from './screens/TaskDetails';
 import Home from './screens/Home';
 
 import { GlobalStyles, Colors } from './constants/styles';
 import IconButton from './components/UI/IconButton';
 import TasksContextProvider from './store/tasks-context';
-import HandleReminders from './components/Reminders/HandleReminders';
+
 import * as Notifications from "expo-notifications";
 //import LoginScreen from './screens/LoginScreen';
 
@@ -129,6 +130,7 @@ export default function App() {
               //presentation change how the screen will look like
               presentation:'modal',
             }}/>
+            <Stack.Screen name = "TaskDetails" component={TaskDetails} />
           </Stack.Navigator>
 
         </NavigationContainer>
