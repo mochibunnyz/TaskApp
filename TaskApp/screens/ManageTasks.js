@@ -2,7 +2,7 @@ import { useContext, useLayoutEffect, useState } from 'react';
 import {StyleSheet, Text, View, ScrollView} from 'react-native';
 
 import IconButton from '../components/UI/IconButton';
-import Button from '../components/UI/Button';
+
 import { GlobalStyles } from '../constants/styles';
 import { TasksContext } from '../store/tasks-context';
 import TaskForm from '../components/ManageTask/TaskForm';
@@ -13,6 +13,7 @@ import ErrorOverlay from '../components/UI/ErrorOverlay';
 import { useLocalNotification } from "../util/useLocalNotification";
 import * as Notifications from "expo-notifications";
 import { schedulePushNotification } from "../util/handle-local-notification";
+import Home from './Home';
 //import { Button } from "react-native";
 
 Notifications.setNotificationHandler({
@@ -50,6 +51,7 @@ function ManageTasks({route, navigation}){
         try{
             await deleteTask(editedTaskId);
             tasksCtx.deleteTask(editedTaskId);
+            
         }
 
         catch(error){
@@ -59,7 +61,7 @@ function ManageTasks({route, navigation}){
         
         
         //goBack() go back to the screen it was called
-        navigation.goBack();
+        navigation.navigate(Home);
         
     }
     function cancelHandler(){

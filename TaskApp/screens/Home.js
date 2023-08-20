@@ -42,7 +42,11 @@ function Home(){
         return <LoadingOverlay/>;
     }
 
-    return <TasksOutput tasks={tasksCtx.tasks} tasksPeriod="Total"/>;
+    return(
+        
+        <TasksOutput tasks={tasksCtx.tasks} tasksPeriod="Total"/>
+
+    ); 
 }
 
 export default Home;

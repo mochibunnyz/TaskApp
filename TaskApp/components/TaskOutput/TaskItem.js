@@ -4,6 +4,7 @@ import { GlobalStyles } from "../../constants/styles";
 import { getFormattedDate } from "../../util/date";
 import { useContext } from "react";
 import { TasksContext } from "../../store/tasks-context";
+import { Ionicons } from '@expo/vector-icons';
 
 
 
@@ -36,15 +37,25 @@ function TaskItem({id,title, description, location, date, reminder, link}){
             <View style={styles.taskItem}>
                 <View>
                     <Text style={[styles.textBase, styles.title]}>{title}</Text>
-                    <Text style={[styles.textBase, styles.location]}>Location: {location}</Text>
-                    
                     {/* Show date */}
-                    <Text style={[styles.textBase]}>Due: {getFormattedDate(date)}</Text>
+                    <Text style={[styles.textBase, styles.date]}>Due: {getFormattedDate(date)}</Text>
+
+                    {location &&(
+                        <View style={styles.locationContainer}>
+                            <Ionicons name="location-outline" size={12} color={GlobalStyles.colors.primary700}  />
+                            <Text style={[styles.textBase, styles.location]}> {location}</Text>
+
+                        </View>
+                    )}
+                    
+                    
+                    
+                    
                 </View>
-                <TouchableOpacity onPress={completeTaskHandler}  style={styles.doneContainer}>
+                {/* <TouchableOpacity onPress={completeTaskHandler}  style={styles.doneContainer}>
                     <Text style={styles.doneText}>Done
                     </Text>   
-                </TouchableOpacity>
+                </TouchableOpacity> */}
                 
             </View>
         </Pressable>
@@ -61,27 +72,42 @@ const styles = StyleSheet.create({
         padding:12,
         marginVertical:8,
         marginHorizontal:5,
-        backgroundColor:GlobalStyles.colors.primary100,
+        backgroundColor:'white',
         flexDirection:'row',
         justifyContent:'space-between',
         borderRadius:15,
         elevation:3,
+        borderColor:GlobalStyles.colors.primary100,
+        borderWidth:1,
         shadowColor:GlobalStyles.colors.gray500,
         shadowRadius:4,
         shadowOffset:{width:1, height:1},
         shadowOpacity:0.4
     },
     textBase:{
-        color:GlobalStyles.colors.primary50
+        color:GlobalStyles.colors.primary700
+    },
+    date:{
+        fontWeight:300,
+        fontSize:11
     },
     title:{
         fontSize:16,
         marginBottom:3,
         fontWeight:'bold'
     },
+    locationContainer:{
+        
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+    },
     location:{
         fontSize:13,
         marginBottom:18,
+        marginTop:17,
+        paddingRight:20,
+        fontWeight:600,
         
     },
 

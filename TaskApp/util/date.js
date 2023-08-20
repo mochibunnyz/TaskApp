@@ -28,3 +28,14 @@ export function getDateMinusDays(date, days){
     return new Date( date.getDate()-days, date.getMonth(), date.getFullYear());
     //return new Date(date.getFullYear(), date.getMonth(), date.getDate()-days);
 }
+export function getDatePlusDays(date,days){
+    //reminder.setSeconds(reminder.getSeconds() + 20);
+    
+    
+    //date.setDate(date.getDate() + days);
+    //date = date.toDateString();
+
+    //return date;
+    //return new Date( date.getDate()+days, date.getMonth(), date.getFullYear());
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate()+days);
+}
