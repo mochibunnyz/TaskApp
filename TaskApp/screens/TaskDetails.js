@@ -1,13 +1,14 @@
 import { useContext, useLayoutEffect, useState } from 'react';
 import {StyleSheet, Text, View, ScrollView, Button, Linking, TouchableOpacity} from 'react-native';
-import LoadingOverlay from '../components/UI/LoadingOverlay';
 
 import { GlobalStyles } from '../constants/styles';
 import { TasksContext } from '../store/tasks-context';
 import { getFormattedDate, toDateStringFunction, toTimeSlice} from '../util/date';
 import { Ionicons } from '@expo/vector-icons';
 import IconButton from '../components/UI/IconButton';
-import {deleteTask, storeTask, updateTask} from '../util/http';
+import {deleteTask} from '../util/http';
+import LoadingOverlay from '../components/UI/LoadingOverlay';
+import ErrorOverlay from '../components/UI/ErrorOverlay';
 
 
 function TaskDetails({route, navigation}){
@@ -18,12 +19,14 @@ function TaskDetails({route, navigation}){
     //const isEditing = !!editedTaskId;
 
     const selectedTask = tasksCtx.tasks.find((task) => task.id === editedTaskId);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState();
 
     async function deleteTaskHandler(){
         setIsSubmitting(true);
         try{
-            await deleteTask(editedTaskId);
-            tasksCtx.deleteTask(editedTaskId);
+            await deleteTask(selectedTask.id);
+            tasksCtx.deleteTask(selectedTask.id);
         }
 
         catch(error){
@@ -55,7 +58,15 @@ function TaskDetails({route, navigation}){
         });
 
     }, [navigation]);
-    console.log(selectedTask);
+    
+    if(error && !isSubmitting){
+        return <ErrorOverlay message={error} />;
+    }
+
+    if (isSubmitting){
+        return <LoadingOverlay/>;
+    }
+
     return(
         <View style={styles.container}>
             {/*Name and date */}
@@ -104,7 +115,7 @@ function TaskDetails({route, navigation}){
 
             {/*Button */}
             <View style={styles.buttonsContainer}>
-                <TouchableOpacity  style={[styles.detailsButtons, styles.whiteButtons]}>
+                <TouchableOpacity onPress={deleteTaskHandler} style={[styles.detailsButtons, styles.whiteButtons]}>
                     <Text style={styles.purpleText}>Delete</Text>
                 </TouchableOpacity>
 
@@ -112,6 +123,7 @@ function TaskDetails({route, navigation}){
                     <Text style= {{color:'white'}}>Confirm</Text>
                 </TouchableOpacity>
             </View>
+            
             
             
             

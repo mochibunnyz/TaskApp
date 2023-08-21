@@ -52,13 +52,14 @@ function ManageTasks({route, navigation}){
             await deleteTask(editedTaskId);
             tasksCtx.deleteTask(editedTaskId);
             
+            
         }
 
         catch(error){
             setError('Could not delete task - please try again later!');
             setIsSubmitting(false);
         }
-        
+        //setIsSubmitting(false);
         
         //goBack() go back to the screen it was called
         navigation.navigate(Home);

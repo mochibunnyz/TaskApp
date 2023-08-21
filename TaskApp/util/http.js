@@ -10,9 +10,7 @@ export async function storeTask(taskData){
 
 export async function fetchTask(){
     const response = await axios.get(BACKEND_URL + '/tasks.json');
-
     const tasks = [];
-
     for( const key in response.data){
         const taskObj = {
             id: key,
@@ -26,7 +24,6 @@ export async function fetchTask(){
         };
         tasks.push(taskObj);
     }
-
     return tasks;
 }
 
