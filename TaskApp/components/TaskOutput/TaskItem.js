@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { GlobalStyles } from "../../constants/styles";
-import { getFormattedDate } from "../../util/date";
+import { getFormattedDate, toTimeSlice } from "../../util/date";
 import { useContext } from "react";
 import { TasksContext } from "../../store/tasks-context";
 import { Ionicons } from '@expo/vector-icons';
@@ -9,7 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 
 //create the task item card
-function TaskItem({id,title, description, location, date, reminder, link}){
+function TaskItem({id,title, description, location, date, reminder, link, startDate}){
 
     //as the function is not part of a screen, to use navigate, need to use a prop
     const navigation = useNavigation();
@@ -38,11 +38,13 @@ function TaskItem({id,title, description, location, date, reminder, link}){
                 <View>
                     <Text style={[styles.textBase, styles.title]}>{title}</Text>
                     {/* Show date */}
-                    <Text style={[styles.textBase, styles.date]}>Due: {getFormattedDate(date)}</Text>
+                    
+                    <Text style={[styles.textBase, styles.date]}> Due: {getFormattedDate(date)}, {toTimeSlice(date)}</Text>
+                    
 
                     {location &&(
                         <View style={styles.locationContainer}>
-                            <Ionicons name="location-outline" size={12} color={GlobalStyles.colors.primary700}  />
+                            <Ionicons name="location-outline" size={14} color={GlobalStyles.colors.primary700}  />
                             <Text style={[styles.textBase, styles.location]}> {location}</Text>
 
                         </View>
@@ -82,7 +84,8 @@ const styles = StyleSheet.create({
         shadowColor:GlobalStyles.colors.gray500,
         shadowRadius:4,
         shadowOffset:{width:1, height:1},
-        shadowOpacity:0.4
+        shadowOpacity:0.4,
+        minHeight:100,
     },
     textBase:{
         color:GlobalStyles.colors.primary700
@@ -99,14 +102,11 @@ const styles = StyleSheet.create({
     locationContainer:{
         
         flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
+        justifyContent: "flex-start",
+        marginTop:20
     },
     location:{
         fontSize:13,
-        marginBottom:18,
-        marginTop:17,
-        paddingRight:20,
         fontWeight:600,
         
     },

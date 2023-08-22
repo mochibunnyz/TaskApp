@@ -5,16 +5,13 @@ import { useEffect, useRef } from 'react';
 
 
 //import Button from "../UI/Button";
-import { getFormattedDate, toDateStringFunction, toStringFunction } from "../../util/date";
+import { getFormattedDate, toDateStringFunction, toStringFunction, toTimeSlice } from "../../util/date";
 import { GlobalStyles } from "../../constants/styles";
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 
 
 function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
-
-    const [pickerDate, setPickerDate] = useState(new Date());
-    const [showPicker, setShowPicker] = useState(false);
 
     const [location,setLocation] = useState(defaultValues ? defaultValues.location: '');
     const [locationIsValid, setLocationIsValid] = useState(true);
@@ -23,8 +20,19 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
     const [titleIsValid, setTitleIsValid] = useState(true);
 
 
-    const [date, setDate] = useState(defaultValues ? toDateStringFunction(defaultValues.date): "");
+    const [date, setDate] = useState(defaultValues ? toStringFunction(defaultValues.date): "");
+    const [showEndDate, setEndDate] = useState(defaultValues ? toDateStringFunction(defaultValues.date): "");
+    const [showEndTime, setEndTime] = useState(defaultValues ? toTimeSlice(defaultValues.date): "");
+    const [pickerDate, setPickerDate] = useState(new Date());
+    const [showPicker, setShowPicker] = useState(false);
     const [dateIsValid, setDateIsValid] = useState(true);
+
+    const [startDate, setStartDate] = useState(defaultValues ? toStringFunction(defaultValues.startDate): "");
+    const [showStartDate, setShowStartDate] = useState(defaultValues ? toDateStringFunction(defaultValues.startDate): "");
+    const [showStartTime, setShowStartTime] = useState(defaultValues ? toTimeSlice(defaultValues.startDate): "");
+    const [pickerStartDate, setPickerStartDate] = useState(new Date());
+    const [showStartPicker, setShowStartPicker] = useState(false);
+    const [startDateIsValid, setStartDateIsValid] = useState(true);
 
     const [description, setDescription] = useState(defaultValues ? defaultValues.description: '');
     const [descriptionIsValid, setDescriptionIsValid] = useState(true);
@@ -35,6 +43,9 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
     const [reminderIsValid, setReminderIsValid] = useState(true);
 
     const [link, setLink] = useState(defaultValues ? defaultValues.link: '');
+
+    
+    // const [reminderIsValid, setReminderIsValid] = useState(true);
    
     
 
@@ -47,6 +58,7 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
             location: location,
             title:title,
             date: new Date(date),
+            startDate: new Date(startDate),
             reminder: new Date(reminder),
             link: link,
             description:description
@@ -82,6 +94,10 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
 
 
     }
+    //to togger the visibility of the startdatepicker
+    const toggleStartDatepicker = () =>{
+        setShowStartPicker(!showStartPicker);
+    };
 
     //to togger the visibility of the datepicker
     const toggleDatepicker = () =>{
@@ -91,6 +107,18 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
     const toggleReminderpicker = () =>{
         setShowReminderPicker(!showReminderPicker);
     };
+
+    //for changing picker date
+    const onChangeStartDate =({type}, selectedDate) =>{
+        if(type == "set"){
+            const currentDate = selectedDate;
+            setPickerStartDate(currentDate);
+        }
+        else{
+            toggleStartDatepicker();
+        }
+    };
+
 
     //for changing picker date
     const onChange =({type}, selectedDate) =>{
@@ -114,11 +142,21 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
         }
     };
 
+    //to confirm the start date from the datepicker into date field and start date inputs
+    const confirmStartDate =() =>{
+        setStartDate(pickerStartDate.toString());
+        setShowStartDate(pickerStartDate.toDateString());
+        setShowStartTime(pickerStartDate.toLocaleTimeString());
+        toggleStartDatepicker();
+    }
+
 
 
     //to confirm the date from the datepicker into date textInput
     const confirmDate =() =>{
-        setDate(pickerDate.toDateString());
+        setDate(pickerDate.toString());
+        setEndDate(pickerDate.toDateString());
+        setEndTime(pickerDate.toLocaleTimeString());
         toggleDatepicker();
     }
     //to confirm the date from the reminder picker into reminder textInput
@@ -127,6 +165,9 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
         setReminder(pickerReminder.toString());
         toggleReminderpicker();
     }
+
+    
+
 
    
 
@@ -160,16 +201,81 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
                 </View>
 
             </View>
+
+            {/* for Start date  */}
+            <View style={styles.inputsRow}>
+                <View style={[styles.inputContainer,styles.rowInput]}>
+                    <Text style={[styles.label]}>Start Date</Text>
+                    {/* DatePicker */}
+                    {showStartPicker && (
+                        <DateTimePicker
+                        mode="datetime"
+                        display="spinner"
+                        value={pickerStartDate}
+                        onChange={onChangeStartDate}
+                        style = {styles.datePicker}
+                        textColor={GlobalStyles.colors.primary700}
+                        />
+
+                    )}
+                    {/* buttons for DatePicker */}
+                    {showStartPicker && Platform.OS === 'ios' &&(
+                        <View 
+                        style={[styles.pickerButtonContainer]}
+                        >
+                            <TouchableOpacity onPress= {toggleStartDatepicker} style={[styles.pickerButtons, styles.dateButton, styles.whiteButtons]}>
+                                <Text style={styles.purpleText}>Cancel</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity onPress = {confirmStartDate} style={[styles.pickerButtons, styles.dateButton, styles.blueButtons]}>
+                                <Text style= {{color:'white'}}>Confirm</Text>
+                            </TouchableOpacity>
+
+
+                        </View>
+
+                    )}
+                    {!showStartPicker && (
+                        <Pressable
+                            style={styles.dateContainer}
+                            onPress={toggleStartDatepicker}
+                        >
+                            <TextInput
+                                style={[styles.input, styles.dateInput]}
+                                placeholder={pickerStartDate.toDateString()}
+                                value= {showStartDate}
+                                onChangeText={setShowStartDate}
+                                editable={false}
+                                onPressIn={toggleStartDatepicker}
+                            />
+                            <TextInput
+                                style={[styles.input, styles.dateInput]}
+                                placeholder={pickerStartDate.toLocaleTimeString()}
+                                value= {showStartTime}
+                                onChangeText={setShowStartTime}
+                                editable={false}
+                                onPressIn={toggleStartDatepicker}
+                            />
+                        
+
+                        </Pressable>
+                    )}
+                    
+                </View>
+
+                
+                
+            </View>
             
 
             {/* for due date  */}
             <View style={styles.inputsRow}>
                 <View style={[styles.inputContainer,styles.rowInput]}>
-                    <Text style={[styles.label]}>Due Date</Text>
+                    <Text style={[styles.label]}>End Date</Text>
                     {/* DatePicker */}
                     {showPicker && (
                         <DateTimePicker
-                        mode="date"
+                        mode="datetime"
                         display="spinner"
                         value={pickerDate}
                         onChange={onChange}
@@ -197,13 +303,22 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
                     )}
                     {!showPicker && (
                         <Pressable
+                            style={styles.dateContainer}
                             onPress={toggleDatepicker}
                         >
                             <TextInput
-                                style={styles.input}
+                                style={[styles.input, styles.dateInput]}
                                 placeholder={pickerDate.toDateString()}
-                                value= {date}
-                                onChangeText={setDate}
+                                value= {showEndDate}
+                                onChangeText={setEndDate}
+                                editable={false}
+                                onPressIn={toggleDatepicker}
+                            />
+                            <TextInput
+                                style={[styles.input, styles.dateInput]}
+                                placeholder={pickerDate.toLocaleTimeString()}
+                                value= {showEndTime}
+                                onChangeText={setEndTime}
                                 editable={false}
                                 onPressIn={toggleDatepicker}
                             />
@@ -217,6 +332,7 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
                 
                 
             </View>
+            
 
             {/* input text for reminder */}
             <View style={styles.inputsRow}>
@@ -252,7 +368,7 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
 
                     )}
                     {!showReminderPicker && (
-                        <Pressable
+                        <Pressable 
                             onPress={toggleReminderpicker}
                         >
                             <TextInput
@@ -355,6 +471,14 @@ const styles = StyleSheet.create({
         color:'black',
         marginVertical:24,
         textAlign:'center'
+    },
+    dateContainer:{
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+    },
+    dateInput:{
+        minWidth:150
     },
     buttons:{
         flexDirection:'row',
