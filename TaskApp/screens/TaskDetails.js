@@ -72,7 +72,8 @@ function TaskDetails({route, navigation}){
             {/*Name and date */}
             <View style= {styles. dividerContainer}>
                 <Text style= {styles.title}>{selectedTask.title}</Text>
-                <Text style= {styles.date}>{toDateStringFunction(selectedTask.date)}</Text>
+                <Text style= {styles.date}>{toDateStringFunction(selectedTask.startDate)} -  {toDateStringFunction(selectedTask.date)}</Text>
+                <Text style= {styles.date}>{toTimeSlice(selectedTask.startDate)} -  {toTimeSlice(selectedTask.date)}</Text>
 
             </View>
             {/*Location */}
@@ -145,7 +146,7 @@ const styles = StyleSheet.create({
         borderBottomWidth:1,
     },
     title:{
-        color:'black',
+        color:GlobalStyles.colors.primary700,
         fontSize:35,
         fontWeight:'bold',
         left: 0,

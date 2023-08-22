@@ -46,25 +46,6 @@ function ManageTasks({route, navigation}){
     }, [navigation, isEditing]);
 
     
-    async function deleteTaskHandler(){
-        setIsSubmitting(true);
-        try{
-            await deleteTask(editedTaskId);
-            tasksCtx.deleteTask(editedTaskId);
-            
-            
-        }
-
-        catch(error){
-            setError('Could not delete task - please try again later!');
-            setIsSubmitting(false);
-        }
-        //setIsSubmitting(false);
-        
-        //goBack() go back to the screen it was called
-        navigation.navigate(Home);
-        
-    }
     function cancelHandler(){
         navigation.goBack();
     }
@@ -125,17 +106,7 @@ function ManageTasks({route, navigation}){
                 defaultValues={selectedTask}
             />
             
-            {/* if the page is in editing mode, show delete icon */}
-            {isEditing && (
-                <View style={styles.deleteContainer}>
-                    <IconButton 
-                        icon="trash" 
-                        color={GlobalStyles.colors.gray500} 
-                        size={36} 
-                        onPress={deleteTaskHandler}
-                    />
-                </View>
-            ) }
+            
             </ScrollView>
         </View>
     );

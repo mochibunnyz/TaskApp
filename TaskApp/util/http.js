@@ -15,11 +15,13 @@ export async function fetchTask(){
         const taskObj = {
             id: key,
             date: new Date (response.data[key].date),
+            startDate: new Date (response.data[key].startDate),
             description: response.data[key].description,
             location: response.data[key].location,
             reminder:new Date(response.data[key].reminder),
             title:response.data[key].title,
-            link: response.data[key].link
+            link: response.data[key].link,
+            
             
         };
         tasks.push(taskObj);
