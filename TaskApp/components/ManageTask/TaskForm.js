@@ -66,34 +66,50 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
 
         //VALIDATION
         
-        const checklocationIsValid =taskData.location.trim().length >0;
-        const checktitleIsValid = taskData.title.trim().length >0;
-        const checkdateIsValid = taskData.date.toString() !== 'Invalid Date';
-        const checkreminderIsValid = taskData.date.toString() !== 'Invalid Date';
 
-        setLocationIsValid(checklocationIsValid);
-        setTitleIsValid(checktitleIsValid);
-        setDateIsValid(checkdateIsValid);
-        setReminderIsValid(checkreminderIsValid);
-        
+        // Validate each field
+        const titleIsValid = isTitleValid(taskData.title);
+        const startDateIsValid = !isNaN(taskData.startDate);
+        const dateIsValid = !isNaN(taskData.date);
+        const reminderIsValid = !isNaN(taskData.reminder)  && isReminderValid(taskData.reminder);;
+
+        // Update state variables
+        setTitleIsValid(titleIsValid);
+        setStartDateIsValid(startDateIsValid);
+        setDateIsValid(dateIsValid);
+        setReminderIsValid(reminderIsValid);
+
+        // Check overall form validity
+        const formIsValid = locationIsValid && titleIsValid && dateIsValid && reminderIsValid;
     
-        //trim() remove all the white spaces
-        //const descriptionIsValid = taskData.description.trim().length >0;
-
-       /*  if(!locationIsValid  || !titleIsValid|| !dateIsValid || !descriptionIsValid){
-
-       
-            return;
-        } */
+        
 
         //submit data 
-        onSubmit(taskData);
+        //onSubmit(taskData);
+        if (formIsValid) {
+            // Submit data
+            onSubmit(taskData);
+        }
 
         
 
 
 
     }
+
+    //check whether title is valid
+    function isTitleValid(title) {
+        return title.trim().length > 0;
+    }
+
+    // Validation function to check if the reminder is at least 1 minutes later than the current time
+    function isReminderValid(reminderDate) {
+        const currentDateTime = new Date();
+        const oneMinutesLater = new Date(currentDateTime.getTime() +  60 * 1000); // Add 2 minutes
+    
+        return reminderDate > oneMinutesLater;
+    }
+
     //to togger the visibility of the startdatepicker
     const toggleStartDatepicker = () =>{
         setShowStartPicker(!showStartPicker);
@@ -174,18 +190,19 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
     
 
     //view for the form
-    const formIsInvalid = !locationIsValid  ||!titleIsValid ||!dateIsValid|| !reminderIsValid; 
+    //const formIsInvalid = !locationIsValid  ||!titleIsValid ||!dateIsValid|| !reminderIsValid; 
     return (
         <View style={styles.form}>
             
             <View style={styles.inputsRow}>
-                <View style={[styles.inputContainer,styles.rowInput]}>
+                <View style={[styles.inputContainer,styles.rowInput, ]}>
                     <Text style={[styles.label]}>Title</Text>
                     <TextInput 
-                        style={inputStyles}
+                        style={[inputStyles]}
                         value={title}
                         onChangeText={setTitle}
                     />
+                    {!titleIsValid && <Text style={styles.errorText}>Title is required</Text>}
                 </View>
 
             </View>
@@ -256,9 +273,11 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
                                 editable={false}
                                 onPressIn={toggleStartDatepicker}
                             />
+                            
                         
 
                         </Pressable>
+                        
                     )}
                     
                 </View>
@@ -442,7 +461,11 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
             
 
             {/* validation message */}
-            {formIsInvalid && (<Text style={styles.errorText}>Invalid input values - please check your entered data!</Text>)}
+            
+            
+            {!startDateIsValid  && <Text style={styles.errorText}>Please select a valid start date</Text>}
+            {!dateIsValid && <Text style={styles.errorText}>Please select a valid end date</Text>}
+            {!reminderIsValid && <Text style={styles.errorText}>Please select a valid reminder date or please make sure the reminder time is at least 1 min after the current time.</Text>}
 
             <View style = {styles.buttons}>
                 <TouchableOpacity style = {[styles.button,styles.whiteButtons]}  onPress={onCancel}>
