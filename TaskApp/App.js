@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { Settings, StyleSheet, Text, View } from 'react-native';
 import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
@@ -9,6 +9,7 @@ import {Ionicons, FontAwesome} from '@expo/vector-icons';
 import ManageTasks from './screens/ManageTasks';
 import RecentTasks from './screens/RecentTasks';
 import TaskDetails from './screens/TaskDetails';
+import Setting from './screens/Settings';
 import Home from './screens/Home';
 
 import { GlobalStyles, Colors } from './constants/styles';
@@ -78,12 +79,26 @@ function TasksOverview(){
       /> */}
 
       {/* Recent tasks */}
-      <BottomTabs.Screen 
+      {/* <BottomTabs.Screen 
         name = "RecentTasks" 
         component={RecentTasks}
         options={{
           title: "Recent Tasks",
           tabBarLabel:"Recent",
+          tabBarIcon:({color,size}) => (
+            <Ionicons name="hourglass" size={size} color={color} />
+          ),
+          
+        }}
+      /> */}
+
+      {/* settings */}
+      <BottomTabs.Screen 
+        name = "Settings" 
+        component={Setting}
+        options={{
+          title: "Settings",
+          tabBarLabel:"Setting",
           tabBarIcon:({color,size}) => (
             <Ionicons name="hourglass" size={size} color={color} />
           ),

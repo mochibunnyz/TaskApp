@@ -8,6 +8,7 @@ import { useEffect, useRef } from 'react';
 import { getFormattedDate, toDateStringFunction, toStringFunction, toTimeSlice } from "../../util/date";
 import { GlobalStyles } from "../../constants/styles";
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { Ionicons,  Feather, MaterialIcons } from '@expo/vector-icons';
 
 
 
@@ -44,8 +45,11 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
 
     const [link, setLink] = useState(defaultValues ? defaultValues.link: '');
 
+    const [subtasks, setSubtasks] = useState(defaultValues ? defaultValues.subtasks : []);
     
-    // const [reminderIsValid, setReminderIsValid] = useState(true);
+
+    
+    
    
     
 
@@ -61,7 +65,8 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
             startDate: new Date(startDate),
             reminder: new Date(reminder),
             link: link,
-            description:description
+            description:description,
+            subtasks:subtasks
         };
 
         //VALIDATION
@@ -71,7 +76,12 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
         const titleIsValid = isTitleValid(taskData.title);
         const startDateIsValid = !isNaN(taskData.startDate);
         const dateIsValid = !isNaN(taskData.date);
-        const reminderIsValid = !isNaN(taskData.reminder)  && isReminderValid(taskData.reminder);;
+        const reminderIsValid = !isNaN(taskData.reminder)  && isReminderValid(taskData.reminder);
+        
+        const allSubtasksValid = areAllSubtasksValid();
+       
+        
+        
 
         // Update state variables
         setTitleIsValid(titleIsValid);
@@ -80,7 +90,7 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
         setReminderIsValid(reminderIsValid);
 
         // Check overall form validity
-        const formIsValid = locationIsValid && titleIsValid && dateIsValid && reminderIsValid;
+        const formIsValid = locationIsValid && titleIsValid && dateIsValid && reminderIsValid &&allSubtasksValid;
     
         
 
@@ -109,6 +119,21 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
     
         return reminderDate > oneMinutesLater;
     }
+    //validation to check subtask title
+    function isSubtaskValid(subtask) {
+        return subtask.title.trim().length > 0;
+    }
+
+    // Define a function to check if all subtask titles are valid
+    function areAllSubtasksValid() {
+        for (const subtask of subtasks) {
+            if (!isSubtaskValid(subtask)) {
+                return false; // If any subtask is not valid, return false
+            }
+        }
+        return true; // All subtasks are valid
+    }
+  
 
     //to togger the visibility of the startdatepicker
     const toggleStartDatepicker = () =>{
@@ -182,6 +207,31 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
         toggleReminderpicker();
     }
 
+    //for adding subtask
+    const addSubtask = () => {
+        const newSubtask = {
+          title: '',
+          completed: false,
+        };
+        setSubtasks([...subtasks, newSubtask]);
+    };
+    
+    //for updating subtask
+    const updateSubtaskDescription = (index, text) => {
+        const updatedSubtasks = [...subtasks];
+        updatedSubtasks[index].title = text;
+
+        
+        setSubtasks(updatedSubtasks);
+    };
+      
+    const deleteSubtask = (index) => {
+        const updatedSubtasks = [...subtasks];
+        updatedSubtasks.splice(index, 1);
+        setSubtasks(updatedSubtasks);
+    };
+      
+
     
 
 
@@ -194,6 +244,7 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
     return (
         <View style={styles.form}>
             
+            {/* Title input */}
             <View style={styles.inputsRow}>
                 <View style={[styles.inputContainer,styles.rowInput, ]}>
                     <Text style={[styles.label]}>Title</Text>
@@ -206,7 +257,8 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
                 </View>
 
             </View>
-    
+        
+            {/* Location input */}
             <View style={styles.inputsRow}>
                 <View style={[styles.inputContainer,styles.rowInput]}>
                     <Text style={[styles.label]}>Location</Text>
@@ -352,6 +404,64 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
                 
             </View>
             
+            {/* for  link  */}
+            <View style={styles.inputsRow}>
+                <View style={[styles.inputContainer,styles.rowInput]}>
+                    <Text style={[styles.label]}>Link</Text>
+                    <TextInput 
+                        style={[inputStyles]}
+                        value={link}
+                        onChangeText={setLink}
+                        placeholder="Link"
+                    />
+                </View>
+
+            </View>
+
+            {/* input text for descriptions */}
+            <View style={[styles.inputContainer,styles.rowInput]}>
+                <Text style={[styles.label]}>Description</Text>
+                <TextInput 
+                    style={[styles.input, styles.inputMultiline]}
+                    value={description}
+                    onChangeText={setDescription}
+                    multiline= {true}
+                    placeholder="Notes"
+                />
+            </View>
+            
+            
+            {/* Add subtask */}
+            <View style={styles.inputsRow}>
+                <View style={[styles.inputContainer,styles.rowInput, ]}>
+                    <View style={styles.addSubtaskContainer}>
+                        <Text style={[styles.label]}>SubTasks</Text>
+                        <TouchableOpacity onPress={addSubtask}>
+                            <Ionicons name="add-circle-outline" size={24} color={GlobalStyles.colors.primary700}/>
+                        </TouchableOpacity>
+                    </View>
+                    
+                        {subtasks && subtasks.map((subtask, index) => (
+                            <View key={index} style={styles.addSubtaskContainer}>
+                                <TextInput
+                                value={subtask.title}
+                                style={[inputStyles]}
+                                onChangeText={(text) => updateSubtaskDescription(index, text)}
+                                placeholder="Enter subtask                     "
+                                />
+                                {/* Add more fields or controls for subtasks here */}
+                                <TouchableOpacity onPress={() => deleteSubtask(index)}>
+                                <MaterialIcons name="delete-forever" size={24} color={GlobalStyles.colors.primary700} marginTop ={5} />
+                                </TouchableOpacity>
+                                {!isSubtaskValid(subtask) && (
+                                    <Text style={styles.errorText}>title is required</Text>
+                                )}
+                            </View>
+                        ))}
+                    
+                </View>
+
+            </View>
 
             {/* input text for reminder */}
             <View style={styles.inputsRow}>
@@ -411,62 +521,16 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
 
             
 
-            {/* for  link  */}
-            <View style={styles.inputsRow}>
-                <View style={[styles.inputContainer,styles.rowInput]}>
-                    <Text style={[styles.label]}>Link</Text>
-                    <TextInput 
-                        style={[inputStyles]}
-                        value={link}
-                        onChangeText={setLink}
-                        placeholder="Link"
-                    />
-                </View>
-
-            </View>
-
-            {/* input text for descriptions */}
-            <View style={[styles.inputContainer,styles.rowInput]}>
-                <Text style={[styles.label]}>Description</Text>
-                <TextInput 
-                    style={[styles.input, styles.inputMultiline]}
-                    value={description}
-                    onChangeText={setDescription}
-                    multiline= {true}
-                    placeholder="Notes"
-                />
-            </View>
-
-            {/* for  others */}
-            {/* <View style={styles.inputsRow}>
-                <View style={[styles.inputContainer,styles.rowInput]}>
-                    <Text style={[styles.label]}>Others</Text>
-                    <TextInput 
-                        style={[inputStyles]}
-                        value={link}
-                        onChangeText={setLink}
-                        placeholder="Link"
-                    />
-                    <TextInput 
-                    style={[styles.input, styles.inputMultiline, {marginTop:0, borderTopWidth:0.2, borderTopColor:"blue"}]}
-                    value={description}
-                    onChangeText={setDescription}
-                    multiline= {true}
-                    placeholder="Notes"
-                />
-                </View>
-
-            </View>
-                */}
             
-
+         
             {/* validation message */}
             
             
             {!startDateIsValid  && <Text style={styles.errorText}>Please select a valid start date</Text>}
             {!dateIsValid && <Text style={styles.errorText}>Please select a valid end date</Text>}
             {!reminderIsValid && <Text style={styles.errorText}>Please select a valid reminder date or please make sure the reminder time is at least 1 min after the current time.</Text>}
-
+            {/* Error message for subtasks */}
+            
             <View style = {styles.buttons}>
                 <TouchableOpacity style = {[styles.button,styles.whiteButtons]}  onPress={onCancel}>
                     <Text style= {styles.purpleText}>Cancel</Text>
@@ -595,6 +659,13 @@ const styles = StyleSheet.create({
     },
     pickerText:{
         fontSize:10
+    },
+
+    addSubtaskContainer:{
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginVertical:5
+       
     },
     
 })

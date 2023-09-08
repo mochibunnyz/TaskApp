@@ -23,8 +23,7 @@ function TaskDetails({route, navigation}){
     const selectedTask = tasksCtx.tasks.find((task) => task.id === editedTaskId);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState();
-    //const [subtaskStatus, setSubtaskStatus] = useState({});
-    const [subtaskStatus, setSubtaskStatus] = useState(selectedTask.subtasks? new Array(selectedTask.subtasks.length).fill(false):[]);
+    const [subtaskStatus, setSubtaskStatus] = useState({});
 
     async function deleteTaskHandler(){
         setIsSubmitting(true);
@@ -71,7 +70,7 @@ function TaskDetails({route, navigation}){
         return <LoadingOverlay/>;
     }
 
-    /* const toggleSubtaskStatus = (subtaskId) => {
+    const toggleSubtaskStatus = (subtaskId) => {
         setSubtaskStatus((prevStatus) => ({
           ...prevStatus,
           [subtaskId]: !prevStatus[subtaskId], // Toggle the status
@@ -80,17 +79,16 @@ function TaskDetails({route, navigation}){
 
         // Call the function to update Firebase with the new status
         updateSubtaskStatusInFirebase(selectedTask.id, subtaskId, !subtaskStatus[subtaskId]);
-       
-    }; */
-    const toggleSubtaskStatus = (subtaskIndex) => {
-        setSubtaskStatus((prevStatus) => {
-          const newStatus = [...prevStatus];
-          newStatus[subtaskIndex] = !newStatus[subtaskIndex]; // Toggle the status of the clicked subtask
-          return newStatus;
-        });
-      
-        // Call the function to update Firebase with the new status
-        updateSubtaskStatusInFirebase(selectedTask.id, subtaskIndex, !subtaskStatus[subtaskIndex]);
+       /*  const taskData ={
+            location: selectedTask.location,
+            title:selectedTask.title,
+            date: new Date(selectedTask.date),
+            startDate: new Date(selectedTask.startDate),
+            reminder: new Date(selectedTask.reminder),
+            link: selectedTask.link,
+            description:selectedTask.description,
+            subtasks:selectedTask.subtasks
+        }; */
     };
 
     return(
@@ -127,34 +125,39 @@ function TaskDetails({route, navigation}){
             {/* Subtasks */}
             {selectedTask.subtasks && (
                 <View style={styles.dividerContainer}>
-                    <Text style={styles.label}>Subtasks </Text>
-                    {selectedTask.subtasks.map((subtask, index) => (
-                    <View key={subtask.id}>
-                        {/* Subtask title */}
-                        <TouchableOpacity onPress={() => toggleSubtaskStatus(index)}>
-                        <View style={styles.subtaskContainer}>
-                            {/* Circle indicator */}
-                            <View
-                            style={[
-                                styles.circle,
-                                subtaskStatus[index]
-                                ? styles.completedCircle
-                                : styles.incompleteCircle,
-                            ]}
-                            />
-
-                            <Text
-                            style={
-                                subtaskStatus[index]
-                                ? styles.completed
-                                : styles.incomplete
-                            }
+                    <Text style={styles.label}>Subtask </Text>
+                    {selectedTask.subtasks.map((subtask) => (
+                        <View key={subtask.id} >
+                            {/* Subtask title */}
+                            <TouchableOpacity
+                                onPress={() => toggleSubtaskStatus(subtask.id)}
                             >
-                            {subtask.title}
-                            </Text>
+                            <View style={styles.subtaskContainer}>
+                                {/* Circle indicator */}
+                                <View
+                                style={[
+                                    styles.circle,
+                                    subtaskStatus[subtask.id]
+                                    ? styles.completedCircle
+                                    : styles.incompleteCircle,
+                                ]}
+                                />
+
+                                
+                                <Text
+                                    style={
+                                    subtaskStatus[subtask.id]
+                                        ? styles.completed
+                                        : styles.incomplete
+                                    }
+                                >
+                                    {subtask.title}
+                                </Text>
+                                
+                            </View>
+                            </TouchableOpacity>
                         </View>
-                        </TouchableOpacity>
-                    </View>
+                        
                     ))}
                 </View>
             )}
