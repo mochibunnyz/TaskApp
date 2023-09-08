@@ -25,11 +25,7 @@ function taskReducer(state, action){
                 (task)=> task.id === action.payload.id
             );
             const updateableTask = state[updateableTaskIndex];
-
-            
-            
             const updatedItem ={...updateableTask, ...action.payload.data };
-
             const updatedTasks = [...state];
             updatedTasks[updateableTaskIndex] = updatedItem;
             return updatedTasks;
@@ -50,7 +46,6 @@ function TasksContextProvider({children}){
 
     function addTask(taskData){
         dispatch({type:'ADD', payload:taskData});
-        
     }
     
 
@@ -65,7 +60,6 @@ function TasksContextProvider({children}){
 
     function updateTask(id, taskData){
         dispatch({type:'UPDATE', payload:{id:id, data:taskData}});
-        
     }
 
    
