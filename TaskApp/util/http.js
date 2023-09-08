@@ -37,7 +37,8 @@ export async function fetchTask(){
             title:response.data[key].title,
             link: response.data[key].link,
             //subtasks:response.data[key].subtasks
-            subtasks:subtasks
+            subtasks:subtasks,
+            calendarEventId: response.data[key].calendarEventId,
             
             
         };
@@ -73,4 +74,25 @@ export async function updateSubtaskStatusInFirebase(taskId, subtaskId, newStatus
         console.error('Error updating subtask status in Firebase:', error);
     }
 }
+
+// Function to update Firebase with the new calendarEventId
+export async function updateCalendarEventId(taskId, calendarEventId) {
+    try {
+        const response = await axios.patch(
+            `${BACKEND_URL}/tasks/${taskId}.json`,
+            { calendarEventId: calendarEventId }
+        );
+
+        if (response.status === 200) {
+            console.log('CalendarEventId status updated in Firebase');
+        } else {
+            console.error('Failed to update CalendarEventId in Firebase');
+            console.error('Response:', response.data); 
+        }
+    } catch (error) {
+        console.error('Error updating CalendarEventId in Firebase:', error);
+    }
+}
+
+
   

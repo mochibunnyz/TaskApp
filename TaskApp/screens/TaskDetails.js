@@ -71,17 +71,7 @@ function TaskDetails({route, navigation}){
         return <LoadingOverlay/>;
     }
 
-    /* const toggleSubtaskStatus = (subtaskId) => {
-        setSubtaskStatus((prevStatus) => ({
-          ...prevStatus,
-          [subtaskId]: !prevStatus[subtaskId], // Toggle the status
-        }));
-        console.log(subtaskId);
-
-        // Call the function to update Firebase with the new status
-        updateSubtaskStatusInFirebase(selectedTask.id, subtaskId, !subtaskStatus[subtaskId]);
-       
-    }; */
+    
     const toggleSubtaskStatus = (subtaskIndex) => {
         setSubtaskStatus((prevStatus) => {
           const newStatus = [...prevStatus];

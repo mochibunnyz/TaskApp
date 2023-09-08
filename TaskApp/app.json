@@ -33,6 +33,12 @@
           "icon": "./local/assets/icon.png",
           "color": "#ffffff"
         }
+      ],
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "The app needs to access your calendar."
+        }
       ]
     ],
     "extra": {
