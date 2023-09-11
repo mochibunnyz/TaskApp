@@ -52,10 +52,11 @@ export function updateTask(id, taskData){
 
 }
 
-export function deleteTask(id){
+export async function deleteTask(id){
     return axios.delete(BACKEND_URL +`/tasks/${id}.json`);
 
 }
+
 
 // Function to update Firebase with the new subtask status
 export async function updateSubtaskStatusInFirebase(taskId, subtaskId, newStatus) {

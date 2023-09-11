@@ -1,8 +1,8 @@
-import { useContext, useLayoutEffect, useState } from 'react';
+import { useContext, useLayoutEffect, useState, useEffect } from 'react';
 import {StyleSheet, Text, View, ScrollView, Button, Linking, TouchableOpacity, TextInput} from 'react-native';
 
 import { GlobalStyles } from '../constants/styles';
-import { TasksContext } from '../store/tasks-context';
+import { TasksContext, } from '../store/tasks-context';
 import { getFormattedDate, toDateStringFunction, toTimeSlice} from '../util/date';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -20,34 +20,60 @@ function TaskDetails({route, navigation}){
     //console.log(tasksCtx);
 
     const editedTaskId = route.params?.taskId;
-    //const isEditing = !!editedTaskId;
+    
 
     const selectedTask = tasksCtx.tasks.find((task) => task.id === editedTaskId);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState();
-    //const [subtaskStatus, setSubtaskStatus] = useState({});
-    const [subtaskStatus, setSubtaskStatus] = useState(selectedTask.subtasks? new Array(selectedTask.subtasks.length).fill(false):[]);
-    //calculate subtask progress
+    
+    const [subtaskStatus, setSubtaskStatus] = useState(selectedTask.subtasks ? new Array(selectedTask.subtasks.length).fill(false) : []);
+    
+    useEffect(() => {
+        //to make sure that the status of each subtask from the database is mapped correctly
+        if (selectedTask && selectedTask.subtasks) {
+          const initialSubtaskStatus = selectedTask.subtasks.map(subtask => subtask.completed);
+          setSubtaskStatus(initialSubtaskStatus);
+        }
+    }, [selectedTask]);
+    
+    
+    //get subtask progress
     const progress = calculateProgress(subtaskStatus);
 
-    async function deleteTaskHandler(){
-        setIsSubmitting(true);
-        try{
-            await deleteTask(selectedTask.id);
-            tasksCtx.deleteTask(selectedTask.id);
-        }
+        
+    };
 
-        catch(error){
+    
+    function deleteTaskHandler() {
+        setIsSubmitting(true);
+        try {
+            // Delete the task from the context (assuming it updates the state)
+            tasksCtx.deleteTask(selectedTask.id);
+            
+            // Now, asynchronously delete the task from the server
+            deleteTask(selectedTask.id);
+            
+            // After the deletion is complete, navigate back
+            //navigation.goBack();
+        } catch (error) {
             setError('Could not delete task - please try again later!');
             setIsSubmitting(false);
-        }
-        
-        
+        } 
+
         //goBack() go back to the screen it was called
         navigation.goBack();
         
     }
     
+
+    if(error && !isSubmitting){
+        return <ErrorOverlay message={error} />;
+    }
+
+    if (isSubmitting){
+        return <LoadingOverlay/>;
+    }
+
     function taskPressHandler(){
         navigation.navigate('ManageTask',{
             taskId:selectedTask.id
@@ -55,6 +81,14 @@ function TaskDetails({route, navigation}){
         
     
     }
+
+    // Check and add "https://" to selectedTask.link if missing
+    if (selectedTask.link && !selectedTask.link.startsWith('https://')) {
+        selectedTask.link = 'https://' + selectedTask.link;
+    }
+
+    // Remove "https://" only for displayed link if it was auto-added
+    let displayedLink = selectedTask.link.startsWith('https://')? selectedTask.link.replace(/^https?:\/\//, ''): selectedTask.link;
     
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -67,36 +101,6 @@ function TaskDetails({route, navigation}){
 
     }, [navigation]);
     
-    if(error && !isSubmitting){
-        return <ErrorOverlay message={error} />;
-    }
-
-    if (isSubmitting){
-        return <LoadingOverlay/>;
-    }
-    //calculate subtask progress
-    function calculateProgress(subtaskStatus) {
-        //if no subtask or if all subtasks are not completed
-        if (!subtaskStatus || subtaskStatus.length === 0) {
-          return 0; 
-        }
-      
-        const completedSubtasks = subtaskStatus.filter((status) => status);
-        return (completedSubtasks.length / subtaskStatus.length) * 100;
-    }
-      
-
-    
-    const toggleSubtaskStatus = (subtaskIndex) => {
-        setSubtaskStatus((prevStatus) => {
-          const newStatus = [...prevStatus];
-          newStatus[subtaskIndex] = !newStatus[subtaskIndex]; // Toggle the status of the clicked subtask
-          return newStatus;
-        });
-      
-        // Call the function to update Firebase with the new status
-        updateSubtaskStatusInFirebase(selectedTask.id, subtaskIndex, !subtaskStatus[subtaskIndex]);
-    };
 
     return(
         <View style={styles.container}>
@@ -180,7 +184,7 @@ function TaskDetails({route, navigation}){
                 {selectedTask.link &&(
                     <View style={styles.dividerContainer}>
                         <Text style={styles.label}>Link </Text>
-                        <Text style={[styles.text, styles.blueText]} onPress={() => Linking.openURL(selectedTask.link)}>{selectedTask.link}</Text>
+                        <Text style={[styles.text, styles.blueText]} onPress={() => Linking.openURL(selectedTask.link)}>{displayedLink}</Text>
                     </View>
                 )}
                 
@@ -193,9 +197,9 @@ function TaskDetails({route, navigation}){
             </ScrollView>
             {/*Button */}
             <View style={styles.buttonsContainer}>
-                {/* <TouchableOpacity onPress={deleteTaskHandler} style={[styles.detailsButtons, styles.whiteButtons]}>
-                    <Text style={styles.purpleText}>Delete</Text>
-                </TouchableOpacity> */}
+                {/* <TouchableOpacity onPress={cancel} style={[styles.detailsButtons, styles.whiteButtons]}>
+                    <Text style={styles.purpleText}>Go Back</Text>
+                </TouchableOpacity>  */}
 
                 <TouchableOpacity onPress={deleteTaskHandler} style={[styles.detailsButtons, styles.blueButtons]}>
                     <Text style= {{color:'white'}}>Delete</Text>

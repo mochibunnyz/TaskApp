@@ -7,7 +7,7 @@ export const TasksContext = createContext({
     setTasks:(tasks) =>{},
     deleteTask: (id)=>{},
     updateTask:(id, {title, description,location,date, reminder, link, startDate, subtasks, calendarEventId})=>{},
-    completeTask: (id)=>{},
+    updateSubtask: (id, subtaskIndex, newStatus)=>{},
 });
 
 function taskReducer(state, action){
@@ -38,7 +38,19 @@ function taskReducer(state, action){
             return state.filter((task) => task.id !== action.payload);
 
         case 'COMPLETE':
-            return state.filter((task) => task.id !== action.payload);
+            return state.map((task) => {
+                if (task.id === action.payload.id) {
+                  const updatedSubtasks = [...task.subtasks];
+                  updatedSubtasks[action.payload.subtaskIndex].completed =
+                    action.payload.newStatus;
+        
+                  return {
+                    ...task,
+                    subtasks: updatedSubtasks,
+                  };
+                }
+                return task;
+            });
         default:
             return state;
     }
@@ -70,8 +82,8 @@ function TasksContextProvider({children}){
 
    
 
-    function completeTask(id){
-        dispatch({type:'COMPLETE', payload:id});
+    function updateSubtask(id, subtaskIndex, newStatus){
+        dispatch({type:'COMPLETE', payload:{id:id, subtaskIndex:subtaskIndex,newStatus:newStatus} });
     }
 
     const value ={
@@ -80,7 +92,7 @@ function TasksContextProvider({children}){
         setTasks:setTasks,
         deleteTask:deleteTask,
         updateTask: updateTask,
-        completeTask:completeTask,
+        updateSubtask:updateSubtask,
     };
 
     return (

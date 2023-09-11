@@ -50,12 +50,6 @@ function ManageTasks({route, navigation}){
         navigation.goBack();
     }
 
-    function completeTaskHandler(){
-        tasksCtx.completeTask(editedTaskId);
-        //goBack() go back to the screen it was called
-        navigation.goBack();
-    }
-
     async function confirmHandler(taskData){
         setIsSubmitting(true);
         try{

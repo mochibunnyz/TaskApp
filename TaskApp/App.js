@@ -78,19 +78,7 @@ function TasksOverview(){
         }}
       /> */}
 
-      {/* Recent tasks */}
-      {/* <BottomTabs.Screen 
-        name = "RecentTasks" 
-        component={RecentTasks}
-        options={{
-          title: "Recent Tasks",
-          tabBarLabel:"Recent",
-          tabBarIcon:({color,size}) => (
-            <Ionicons name="hourglass" size={size} color={color} />
-          ),
-          
-        }}
-      /> */}
+      
 
       {/* settings */}
       <BottomTabs.Screen 
@@ -107,18 +95,7 @@ function TasksOverview(){
       />
       
 
-      {/* <BottomTabs.Screen 
-        name = "Profile" 
-        component = {LoginScreen}
-        options={{
-          title: "Profile",
-          tabBarLabel:"Profile",
-          tabBarIcon:({color,size}) => (
-            <FontAwesome name="user-circle-o" size={size} color={color} />
-          ),
-          
-        }}
-      /> */}
+      
     </BottomTabs.Navigator>
   );
 }
@@ -148,6 +125,7 @@ export default function App() {
             }}/>
             <Stack.Screen name = "TaskDetails" component={TaskDetails} />
             {/* <Stack.Screen name = "WeeklyTasks" component={WeeklyTask} /> */}
+            <Stack.Screen name = "Home" component={Home} />
           </Stack.Navigator>
 
         </NavigationContainer>
