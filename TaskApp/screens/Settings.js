@@ -27,6 +27,7 @@ function Setting(){
   async function addTasksToCalendar() {
     const { status } = await Calendar.requestCalendarPermissionsAsync();
 
+    //if permission is granted, add calendar
     if (status === 'granted') {
       for (const task of tasksCtx.tasks) {
         const startDate = new Date(task.startDate);
@@ -56,7 +57,8 @@ function Setting(){
 
       Alert.alert('Tasks added to the calendar successfully.');
       setAreTasksInCalendar(true);
-    } else {
+    } 
+    else {
       Alert.alert('Calendar permission not granted.');
     }
   };
@@ -106,7 +108,7 @@ function Setting(){
             />
           </View>
 
-          <Text>Calendar permission is required to add tasks.</Text>
+          <Text style={styles.warningText}>Calendar permission is required to add tasks.</Text>
         </View>
 
       </View>
@@ -125,7 +127,8 @@ const styles = StyleSheet.create({
   },
   header:{
     fontSize:18,
-    fontWeight:'bold'
+    fontWeight:'bold',
+    color:GlobalStyles.colors.primary700
   },
   calendarContainer:{
 
@@ -150,7 +153,13 @@ const styles = StyleSheet.create({
   },
   Text:{
     fontSize:13,
+    color:GlobalStyles.colors.primary700
     
+  },
+  warningText:{
+    fontSize:12,
+    fontWeight:'200',
+    color:'red'
   },
   
   buttonText:{

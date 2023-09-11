@@ -5,10 +5,12 @@ import { GlobalStyles } from '../constants/styles';
 import { TasksContext } from '../store/tasks-context';
 import { getFormattedDate, toDateStringFunction, toTimeSlice} from '../util/date';
 import { Ionicons } from '@expo/vector-icons';
-import IconButton from '../components/UI/IconButton';
+
 import {deleteTask, updateSubtaskStatusInFirebase} from '../util/http';
 import LoadingOverlay from '../components/UI/LoadingOverlay';
 import ErrorOverlay from '../components/UI/ErrorOverlay';
+import * as Progress from 'react-native-progress';
+
 
 
 
@@ -25,6 +27,8 @@ function TaskDetails({route, navigation}){
     const [error, setError] = useState();
     //const [subtaskStatus, setSubtaskStatus] = useState({});
     const [subtaskStatus, setSubtaskStatus] = useState(selectedTask.subtasks? new Array(selectedTask.subtasks.length).fill(false):[]);
+    //calculate subtask progress
+    const progress = calculateProgress(subtaskStatus);
 
     async function deleteTaskHandler(){
         setIsSubmitting(true);
@@ -70,6 +74,17 @@ function TaskDetails({route, navigation}){
     if (isSubmitting){
         return <LoadingOverlay/>;
     }
+    //calculate subtask progress
+    function calculateProgress(subtaskStatus) {
+        //if no subtask or if all subtasks are not completed
+        if (!subtaskStatus || subtaskStatus.length === 0) {
+          return 0; 
+        }
+      
+        const completedSubtasks = subtaskStatus.filter((status) => status);
+        return (completedSubtasks.length / subtaskStatus.length) * 100;
+    }
+      
 
     
     const toggleSubtaskStatus = (subtaskIndex) => {
@@ -85,95 +100,105 @@ function TaskDetails({route, navigation}){
 
     return(
         <View style={styles.container}>
-            {/*Name and date */}
-            <View style= {styles. dividerContainer}>
-                <Text style= {styles.title}>{selectedTask.title}</Text>
-                <Text style= {styles.date}>{toDateStringFunction(selectedTask.startDate)} -  {toDateStringFunction(selectedTask.date)}</Text>
-                <Text style= {styles.date}>{toTimeSlice(selectedTask.startDate)} -  {toTimeSlice(selectedTask.date)}</Text>
-
-            </View>
-            {/*Location */}
-            {selectedTask.location &&(
+            <ScrollView>
+                {/*Name and date */}
                 <View style= {styles. dividerContainer}>
-                    <Text style= {styles.label}>Location</Text>
-                    
-                    <View style={styles.locationContainer}>
-                        <Ionicons name="location-outline" size={12} color="black"  />
-                        <Text style= {styles.location}>{selectedTask.location}</Text>
+                    <Text style= {styles.title}>{selectedTask.title}</Text>
+                    <Text style= {styles.date}>{toDateStringFunction(selectedTask.startDate)} -  {toDateStringFunction(selectedTask.date)}</Text>
+                    <Text style= {styles.date}>{toTimeSlice(selectedTask.startDate)} -  {toTimeSlice(selectedTask.date)}</Text>
 
-                    </View>
-                    
                 </View>
-            )}
-            
-            {/*details */}
-            {selectedTask.description &&(
-                <View style={styles.dividerContainer}>
-                    <Text style={styles.label}>Details </Text>
-                    <Text>{selectedTask.description}</Text>
-                </View>
-            )}
+                {/*Location */}
+                {selectedTask.location &&(
+                    <View style= {styles. dividerContainer}>
+                        <Text style= {styles.label}>Location</Text>
+                        
+                        <View style={styles.locationContainer}>
+                            <Ionicons name="location-outline" size={12} color="black"  />
+                            <Text style= {styles.location}>{selectedTask.location}</Text>
 
-            {/* Subtasks */}
-            {selectedTask.subtasks && (
-                <View style={styles.dividerContainer}>
-                    <Text style={styles.label}>Subtasks </Text>
-                    {selectedTask.subtasks.map((subtask, index) => (
-                    <View key={subtask.id}>
-                        {/* Subtask title */}
-                        <TouchableOpacity onPress={() => toggleSubtaskStatus(index)}>
-                        <View style={styles.subtaskContainer}>
-                            {/* Circle indicator */}
-                            <View
-                            style={[
-                                styles.circle,
-                                subtaskStatus[index]
-                                ? styles.completedCircle
-                                : styles.incompleteCircle,
-                            ]}
-                            />
-
-                            <Text
-                            style={
-                                subtaskStatus[index]
-                                ? styles.completed
-                                : styles.incomplete
-                            }
-                            >
-                            {subtask.title}
-                            </Text>
                         </View>
-                        </TouchableOpacity>
+                        
                     </View>
-                    ))}
-                </View>
-            )}
-            
-            
+                )}
+                
+                {/*details */}
+                {selectedTask.description &&(
+                    <View style={styles.dividerContainer}>
+                        <Text style={styles.label}>Details </Text>
+                        <Text>{selectedTask.description}</Text>
+                    </View>
+                )}
 
-            {/*Link */}
-            {selectedTask.link &&(
+                {/* Subtasks */}
+                {selectedTask.subtasks && (
+                    <View style={styles.dividerContainer}>
+                        <Text style={styles.label}>Subtasks </Text>
+                        <View style={styles.progressBarContainer}>
+                            <Progress.Bar
+                                progress={progress / 100}
+                                width={280}
+                                height={7}
+                                color={GlobalStyles.colors.primary700}
+                            />
+                            <Text style={styles.progressText}>{Math.round(progress)}%</Text>
+                        </View>
+                        {selectedTask.subtasks.map((subtask, index) => (
+                        <View key={subtask.id}>
+                            {/* Subtask title */}
+                            <TouchableOpacity onPress={() => toggleSubtaskStatus(index)}>
+                            <View style={styles.subtaskContainer}>
+                                {/* Circle indicator */}
+                                <View
+                                style={[
+                                    styles.circle,
+                                    subtaskStatus[index]
+                                    ? styles.completedCircle
+                                    : styles.incompleteCircle,
+                                ]}
+                                />
+
+                                <Text
+                                style={
+                                    subtaskStatus[index]
+                                    ? styles.completed
+                                    : styles.incomplete
+                                }
+                                >
+                                {subtask.title}
+                                </Text>
+                            </View>
+                            </TouchableOpacity>
+                        </View>
+                        ))}
+                    </View>
+                )}
+                
+                
+
+                {/*Link */}
+                {selectedTask.link &&(
+                    <View style={styles.dividerContainer}>
+                        <Text style={styles.label}>Link </Text>
+                        <Text style={[styles.text, styles.blueText]} onPress={() => Linking.openURL(selectedTask.link)}>{selectedTask.link}</Text>
+                    </View>
+                )}
+                
+
+                {/*Reminders */}
                 <View style={styles.dividerContainer}>
-                    <Text style={styles.label}>Link </Text>
-                    <Text style={[styles.text, styles.blueText]} onPress={() => Linking.openURL(selectedTask.link)}>{selectedTask.link}</Text>
+                    <Text style={styles.label}>Reminders </Text>
+                    <Text style={styles.text}>{getFormattedDate(selectedTask.reminder)} - {toTimeSlice(selectedTask.reminder)}</Text>
                 </View>
-            )}
-            
-
-            {/*Reminders */}
-            <View style={styles.dividerContainer}>
-                <Text style={styles.label}>Reminders </Text>
-                <Text style={styles.text}>{getFormattedDate(selectedTask.reminder)} - {toTimeSlice(selectedTask.reminder)}</Text>
-            </View>
-
+            </ScrollView>
             {/*Button */}
             <View style={styles.buttonsContainer}>
-                <TouchableOpacity onPress={deleteTaskHandler} style={[styles.detailsButtons, styles.whiteButtons]}>
+                {/* <TouchableOpacity onPress={deleteTaskHandler} style={[styles.detailsButtons, styles.whiteButtons]}>
                     <Text style={styles.purpleText}>Delete</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
 
-                <TouchableOpacity style={[styles.detailsButtons, styles.blueButtons]}>
-                    <Text style= {{color:'white'}}>Confirm</Text>
+                <TouchableOpacity onPress={deleteTaskHandler} style={[styles.detailsButtons, styles.blueButtons]}>
+                    <Text style= {{color:'white'}}>Delete</Text>
                 </TouchableOpacity>
             </View>
             
@@ -238,6 +263,15 @@ const styles = StyleSheet.create({
        
               
     },
+    progressBarContainer:{
+        flexDirection: "row",
+        justifyContent: "flex-start",
+        alignItems: "center",
+        marginBottom:12,
+    }, 
+    progressText:{
+        marginHorizontal:15
+    },
     text:{
         fontSize: 15,
         fontWeight: 400,
@@ -251,6 +285,7 @@ const styles = StyleSheet.create({
     buttonsContainer:{
         flexDirection:'row', 
         justifyContent:'space-around',
+        marginVertical:20
        
     },
     detailsButtons:{
@@ -261,7 +296,7 @@ const styles = StyleSheet.create({
         backgroundColor:'white',
         borderRadius:30,
         justifyContent:'center',
-        paddingHorizontal:20,
+        paddingHorizontal:100,
         paddingVertical:15,
     },
     blueButtons:{
