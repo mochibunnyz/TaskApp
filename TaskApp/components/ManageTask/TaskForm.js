@@ -1,9 +1,6 @@
 import { View, StyleSheet, Text, Alert, TextInput, Pressable, Platform, TouchableOpacity, ScrollView } from "react-native";
 import { useState } from "react";
 
-import { useEffect, useRef } from 'react';
-
-
 //import Button from "../UI/Button";
 import { getFormattedDate, toDateStringFunction, toStringFunction, toTimeSlice } from "../../util/date";
 import { GlobalStyles } from "../../constants/styles";
@@ -215,6 +212,8 @@ function TaskForm({submitButtonLabel,onCancel, onSubmit, defaultValues}){
         };
         setSubtasks([...subtasks, newSubtask]);
     };
+
+    
     
     //for updating subtask
     const updateSubtaskDescription = (index, text) => {
