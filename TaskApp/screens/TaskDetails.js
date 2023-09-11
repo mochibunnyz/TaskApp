@@ -39,6 +39,32 @@ function TaskDetails({route, navigation}){
     
     //get subtask progress
     const progress = calculateProgress(subtaskStatus);
+    
+    //calculate subtask progress
+    function calculateProgress(subtaskStatus) {
+        //if no subtask or if all subtasks are not completed
+        if (!subtaskStatus || subtaskStatus.length === 0) {
+          return 0; 
+        }
+      
+        const completedSubtasks = subtaskStatus.filter((status) => status);
+        return (completedSubtasks.length / subtaskStatus.length) * 100;
+    }
+      
+
+    
+    const toggleSubtaskStatus = (subtaskIndex) =>{
+        setSubtaskStatus((prevStatus) => {
+          const newStatus = [...prevStatus];
+          newStatus[subtaskIndex] = !newStatus[subtaskIndex]; // Toggle the status of the clicked subtask
+          return newStatus;
+        });
+      
+        // Call the function to update Firebase with the new status
+        updateSubtaskStatusInFirebase(selectedTask.id, subtaskIndex, !subtaskStatus[subtaskIndex]);
+
+        // Call the context function to update the subtask status in the context
+        tasksCtx.updateSubtask(selectedTask.id, subtaskIndex, !subtaskStatus[subtaskIndex]);
 
         
     };
