@@ -18,7 +18,8 @@ export function toStringFunction(date){
 }
 
 export function toStringSlice(date){
-    return date.toString().slice(0,17);
+    //return date.toString().slice(0,17);
+    return date.toString().slice(0,15);
 }
 
 export function toTimeSlice(date){
@@ -38,4 +39,16 @@ export function getDatePlusDays(date,days){
     //return date;
     //return new Date( date.getDate()+days, date.getMonth(), date.getFullYear());
     return new Date(date.getFullYear(), date.getMonth(), date.getDate()+days);
+
 }
+/* export function getDateMinusDays(date, days) {
+    const newDate = new Date(date); // Create a new date object to avoid modifying the original date
+    newDate.setDate(newDate.getDate() - days);
+    return newDate;
+}
+  
+export function getDatePlusDays(date, days) {
+    const newDate = new Date(date); // Create a new date object to avoid modifying the original date
+    newDate.setDate(newDate.getDate() + days);
+    return newDate;
+} */
